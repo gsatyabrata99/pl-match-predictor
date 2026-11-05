@@ -17,14 +17,17 @@ from . import evaluate, model, sources
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUT = ROOT / "site" / "data" / "predictions.json"
 MANUAL = ROOT / "data" / "manual_results.csv"
-# Season shown on the site's Track Record page. A development season until the one-time
-# held-out evaluation has been run, so nobody inspects the test seasons by accident.
-TRACK_RECORD_SEASON = "2023-24"
+# Season shown on the site's Track Record page as a historical walk-forward backtest.
+# The held-out test of 2024-25 and 2025-26 was run on 2026-11-05, so showing it is fine.
+TRACK_RECORD_SEASON = "2025-26"
 
 
 def active_config() -> model.Config:
-    """Tuned parameters if predictor/params.json exists, else the v0.1 baseline."""
-    return model.Config.load(evaluate.PARAMS) if evaluate.PARAMS.exists() else model.BASELINE
+    """The production parameters. predictor/params.json is required, so the live model
+    can never change silently because a default in code was edited."""
+    if not evaluate.PARAMS.exists():
+        raise FileNotFoundError(f"{evaluate.PARAMS} is missing; the production config must be explicit")
+    return model.Config.load(evaluate.PARAMS)
 
 
 def previous_season(season: str) -> str:
@@ -60,10 +63,9 @@ def build(source: str, season: str, now: datetime) -> dict:
     last = sources.load_mirror(prev).matches()
     prior = model.season_prior(last, teams, cfg)
 
-    # Track record, predicted walk-forward exactly as live predictions are made. It uses a
-    # development season so the sealed test seasons stay unseen (see predictor/evaluate.py).
+    # Track record: a historical backtest, predicted walk-forward exactly as live predictions are made.
     tr = TRACK_RECORD_SEASON
-    evaluate.guard([tr], final=False)
+    evaluate.guard([tr], final=True)   # displaying results is reporting, not model selection
     tr_matches, tr_prev = evaluate.load(tr), evaluate.load(previous_season(tr))
     bt_rows = evaluate.walk_forward(tr, tr_matches, tr_prev, cfg)
     bt = evaluate.metrics(bt_rows, evaluate.probabilities(bt_rows, cfg.rho))

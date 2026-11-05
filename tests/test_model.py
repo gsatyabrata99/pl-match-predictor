@@ -190,3 +190,21 @@ def test_config_round_trips(tmp_path):
     path = tmp_path / "params.json"
     path.write_text('{"params": %s, "note": "ignored"}' % __import__("json").dumps(cfg.to_dict()))
     assert Config.load(path) == cfg
+
+
+def test_production_params_are_explicit_and_v01():
+    """Guards against the live model changing by accident. Update deliberately with a decision record."""
+    from pathlib import Path
+    import json
+    path = Path(__file__).resolve().parent.parent / "predictor" / "params.json"
+    raw = json.loads(path.read_text())
+    assert raw["status"] == "production"
+    assert set(raw["params"]) == {f for f in Config.__dataclass_fields__}
+    assert Config.load(path) == BASELINE
+
+
+def test_build_requires_params_file(tmp_path, monkeypatch):
+    from predictor import build, evaluate
+    monkeypatch.setattr(evaluate, "PARAMS", tmp_path / "missing.json")
+    with pytest.raises(FileNotFoundError):
+        build.active_config()

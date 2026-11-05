@@ -39,3 +39,7 @@ Seasons: 2024-25 and 2025-26, 760 matches, walk-forward from GW1 with previous-s
 The development-season gain did not replicate. The most likely explanation is the draw rate: it moved between periods, and ρ is the parameter that controls draws. Combined with the earlier chronological check, the evidence says these two parameters are sensitive to season-level conditions, and a 0.2% log loss difference is below what four seasons can resolve.
 
 Any analysis or parameter change after this point is **exploratory** and must be labelled as such. The test seasons are no longer untouched for future model selection.
+
+## Production decision (2026-11-05)
+
+v0.1 is retained as the production model (prior 8 games, ρ = −0.08, xG weight 0.7), set explicitly in `predictor/params.json`. The candidate stays in git history (`3b12340`) and in these reports, including this negative result. Further tuning of prior strength and ρ is paused; next priorities are a bookmaker-probability benchmark, recency weighting, draw modelling and an Elo baseline.

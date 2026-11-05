@@ -7,7 +7,11 @@
 Seasons are split once and never mixed:
 
     development  2022-23, 2023-24   tuning and model selection
-    test         2024-25, 2025-26   sealed; run only with --final, never used to choose anything
+    test         2024-25, 2025-26   run only with --final, never used to choose anything
+
+The test seasons were opened once, on 2026-11-05 (experiments/2026-11-05-FINAL-TEST.md).
+They are now previously-inspected data: future model changes need chronological
+validation, and genuinely new fixtures are the strongest independent confirmation.
 
 Every prediction is walk-forward: a gameweek's matches are predicted from a fit on
 matches that kicked off before that gameweek's first kickoff, plus a prior built
@@ -223,7 +227,7 @@ def main(argv=None) -> None:
     t.add_argument("--out", type=Path, default=EXPERIMENTS / "tuning.json")
     c = sub.add_parser("compare", help="baseline vs a candidate config")
     c.add_argument("--params", type=Path, default=PARAMS)
-    c.add_argument("--final", action="store_true", help="run the held-out test seasons (once)")
+    c.add_argument("--final", action="store_true", help="run the test seasons (already inspected on 2026-11-05)")
     c.add_argument("--out", type=Path)
     a = ap.parse_args(argv)
 

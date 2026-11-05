@@ -170,9 +170,11 @@ function renderRecord() {
   const outcome = o => o.hg > o.ag ? "H" : o.hg < o.ag ? "A" : "D";
   const pick = o => [["H", o.ph], ["D", o.pd], ["A", o.pa]].sort((x, y) => y[1] - x[1])[0][0];
   const hits = H.filter(o => pick(o) === outcome(o)).length;
+  document.getElementById("bt-method").textContent =
+    `Historical walk-forward backtest of the ${b.season} season: every gameweek was predicted using only matches played before it, plus ratings carried over from the season before. The model never saw a result before predicting it.`;
   document.getElementById("kpis").innerHTML = [
-    [pct(b.accuracy), `Correct picks, ${b.season}`, `${b.n} matches, each predicted using only earlier games`],
-    [pct(b.home_accuracy), "Always picking the home team", "The simple guess to beat"],
+    [pct(b.accuracy), `Correct picks, ${b.season} backtest`, `${b.n} matches, each predicted using only earlier games`],
+    [pct(b.home_accuracy), "Always picking the home team", `Same ${b.season} matches: the simple guess to beat`],
     [b.brier.toFixed(3), "Probability error (Brier)", `vs ${b.base_brier.toFixed(3)} for flat base rates. Lower is better`],
     [`${hits}/${H.length}`, `Live test, ${span}`, "Picks correct on unseen matches this season"],
   ].map(([v, l, s]) => `<div class="kpi"><span class="v num">${v}</span><span style="font-weight:600">${l}</span><span class="s">${s}</span></div>`).join("");
