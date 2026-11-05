@@ -207,6 +207,9 @@ fetch("data/predictions.json", { cache: "no-cache" })
     DATA = d; M = d.meta; T = Object.fromEntries(d.teams.map(t => [t.name, t]));
     rows = d.teams.map(t => ({ ...t, net: t.att / t.dfn, xgfg: t.xgp ? t.xgf / t.xgp : 0, xgag: t.xgp ? t.xga / t.xgp : 0 }));
     document.getElementById("pg").textContent = M.prior_games;
+    document.getElementById("dc-note").innerHTML = M.rho === 0
+      ? "Many models add the <b>Dixon-Coles</b> correction, a small adjustment to 0–0, 1–0, 0–1 and 1–1. In testing on past seasons it didn't improve predictions, so it is currently switched off."
+      : `Plain Poisson can misjudge low-scoring results, so the model applies the <b>Dixon-Coles</b> correction (ρ = ${M.rho}), a small adjustment to 0–0, 1–0, 0–1 and 1–1 used in academic and betting models.`;
     document.getElementById("mus").textContent = `${M.mu_h.toFixed(2)} expected goals at home, ${M.mu_a.toFixed(2)} away`;
     renderNotes(); initGW(); initMatch();
     if (!d.fixtures.length) document.getElementById("gw-list").innerHTML = `<p class="loading">No upcoming fixtures. The season is over.</p>`;

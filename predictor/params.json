@@ -1,0 +1,13 @@
+{
+  "params": {
+    "xg_weight": 0.7,
+    "no_xg_weight": 0.5,
+    "prior_games": 4,
+    "prior_shrink": 0.75,
+    "mu_prior_games": 0,
+    "rho": 0.0
+  },
+  "selected_by": "experiments/2026-11-05-REPORT.md: minimal change from the v0.1 baseline (prior_games 8->4, rho -0.08->0), chosen on 2022-23 + 2023-24 walk-forward log loss",
+  "status": "provisional - nominated candidate for the held-out test; not yet validated",
+  "nominated": "2026-11-05, before any held-out (2024-25, 2025-26) evaluation"
+}
