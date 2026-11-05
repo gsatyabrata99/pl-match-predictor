@@ -54,16 +54,30 @@ The site will be live at `https://<you>.github.io/pl-match-predictor/`. After th
 4. **Expected goals for a fixture.** `home λ = league home average × home attack × away defence`, and the same for the away side. The gap between the home and away league averages is the home advantage.
 5. **Scorelines.** Each side's goals are modelled as Poisson with mean λ, using the [Dixon-Coles (1997)](https://doi.org/10.1111/1467-9876.00065) adjustment for low scores. Summing the scoreline grid gives win, draw and loss.
 
-All tunable constants live at the top of [`predictor/model.py`](predictor/model.py).
+All tunable values live in the `Config` class in [`predictor/model.py`](predictor/model.py). The defaults are the v0.1 settings; if `predictor/params.json` exists, the site build uses those values instead.
 
-### Performance
+### Evaluation
 
-In a walk-forward test on 2025-26, where each gameweek was predicted using only the matches before it, the model:
+Model changes are judged with a fixed, leakage-tested protocol in [`predictor/evaluate.py`](predictor/evaluate.py):
 
-- picked the correct result **48.6%** of the time, against 42.0% for always backing the home team
-- scored a Brier score of **0.620**, against 0.655 for flat base rates (lower is better)
+| Seasons | Role |
+|---|---|
+| 2022-23, 2023-24 | Development: all tuning and model selection |
+| 2024-25, 2025-26 | Test: sealed, evaluated once per nominated model with `--final` |
+| 2026-27 | Live predictions |
 
-The site also shows a live hold-out test on the current season.
+- **Walk-forward predictions.** Each gameweek is predicted from matches that kicked off before that gameweek's first kickoff, plus a prior built only from the previous season. Tests tamper with future results and check earlier predictions don't move.
+- **Primary metric: multiclass log loss.** Brier score, 1X2 accuracy, draw calibration and calibration bins are reported alongside, and model differences come with paired bootstrap confidence intervals.
+- **Reproducible data.** Historical seasons are pinned to an exact commit of the archive and cached locally, and every experiment records file hashes. Experiment reports live in [`experiments/`](experiments/).
+- **Sealed test seasons.** The code refuses to evaluate a test season without `--final`. A model is nominated *before* the test is run, and the test is not used to choose between models.
+
+```bash
+python -m predictor.evaluate compare           # v0.1 vs params.json on development seasons
+python -m predictor.evaluate tune              # grid search, development seasons only
+python -m predictor.evaluate compare --final   # the held-out test
+```
+
+The site's Track Record page shows a development season (currently 2023-24) until the held-out test has been run, so the test seasons aren't inspected by accident. It also shows a live check on the current season.
 
 ### Limitations
 
@@ -73,8 +87,9 @@ The model knows nothing about injuries, suspensions, rotation, managerial change
 
 ```
 predictor/
-  model.py      ratings, Poisson + Dixon-Coles predictions, backtest
+  model.py      Config, ratings, Poisson + Dixon-Coles predictions
   sources.py    official FPL API and community mirror loaders
+  evaluate.py   walk-forward evaluation, tuning, sealed test seasons
   build.py      CLI that fits the model and writes the site data
 site/
   index.html    single-page app
@@ -83,7 +98,8 @@ site/
   data/predictions.json   generated, committed by the daily job
 data/
   manual_results.csv      optional: scores the data source doesn't have yet
-tests/                    model, data parsing, and JS/Python parity tests
+tests/                    model, data parsing, leakage, and JS/Python parity tests
+experiments/              tuning and evaluation reports with raw results
 .github/workflows/        tests on every push; daily data refresh + Pages deploy
 ```
 
@@ -106,8 +122,9 @@ Team names must match the FPL names. A manual score is only used while the sourc
 ## Roadmap
 
 - FPL tools built on the same ratings: clean sheet odds, attacking returns and captain picks
-- Model tuning: fit ρ, the xG weight and the prior strength by maximum likelihood
 - Recency weighting so recent form counts for more
+- Scoring environment: goals rose from 2.85 to 3.28 a match between 2022-23 and 2023-24. Check whether the current-season league averages adapt fast enough, before adding any new parameter
+- Stronger baselines: Elo and margin-free bookmaker probabilities
 
 ## License
 

@@ -171,7 +171,7 @@ function renderRecord() {
   const pick = o => [["H", o.ph], ["D", o.pd], ["A", o.pa]].sort((x, y) => y[1] - x[1])[0][0];
   const hits = H.filter(o => pick(o) === outcome(o)).length;
   document.getElementById("kpis").innerHTML = [
-    [pct(b.accuracy), "Correct picks, last season", `${b.n} matches, each predicted using only earlier games`],
+    [pct(b.accuracy), `Correct picks, ${b.season}`, `${b.n} matches, each predicted using only earlier games`],
     [pct(b.home_accuracy), "Always picking the home team", "The simple guess to beat"],
     [b.brier.toFixed(3), "Probability error (Brier)", `vs ${b.base_brier.toFixed(3)} for flat base rates. Lower is better`],
     [`${hits}/${H.length}`, `Live test, ${span}`, "Picks correct on unseen matches this season"],

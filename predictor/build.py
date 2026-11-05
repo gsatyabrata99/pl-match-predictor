@@ -12,11 +12,19 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import model, sources
+from . import evaluate, model, sources
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUT = ROOT / "site" / "data" / "predictions.json"
 MANUAL = ROOT / "data" / "manual_results.csv"
+# Season shown on the site's Track Record page. A development season until the one-time
+# held-out evaluation has been run, so nobody inspects the test seasons by accident.
+TRACK_RECORD_SEASON = "2023-24"
+
+
+def active_config() -> model.Config:
+    """Tuned parameters if predictor/params.json exists, else the v0.1 baseline."""
+    return model.Config.load(evaluate.PARAMS) if evaluate.PARAMS.exists() else model.BASELINE
 
 
 def previous_season(season: str) -> str:
@@ -47,9 +55,23 @@ def build(source: str, season: str, now: datetime) -> dict:
     matches = current.matches()
     teams = set(current.teams)
 
-    last = sources.load_mirror(previous_season(season)).matches()
-    prior, relegated = model.season_prior(last, teams)
-    bt = model.backtest(last)
+    cfg = active_config()
+    prev = previous_season(season)
+    last = sources.load_mirror(prev).matches()
+    prior = model.season_prior(last, teams, cfg)
+
+    # Track record, predicted walk-forward exactly as live predictions are made. It uses a
+    # development season so the sealed test seasons stay unseen (see predictor/evaluate.py).
+    tr = TRACK_RECORD_SEASON
+    evaluate.guard([tr], final=False)
+    tr_matches, tr_prev = evaluate.load(tr), evaluate.load(previous_season(tr))
+    bt_rows = evaluate.walk_forward(tr, tr_matches, tr_prev, cfg)
+    bt = evaluate.metrics(bt_rows, evaluate.probabilities(bt_rows, cfg.rho))
+    rates = {k: sum(m.outcome == k for m in tr_prev) / len(tr_prev) for k in "HDA"}
+    base = evaluate.metrics(bt_rows, [rates] * len(bt_rows))
+    backtest = {"season": tr, "n": bt["n"], "accuracy": bt["accuracy"], "log_loss": bt["log_loss"],
+                "brier": bt["brier"], "home_accuracy": sum(r.outcome == "H" for r in bt_rows) / len(bt_rows),
+                "base_brier": base["brier"], "base_log_loss": base["log_loss"]}
 
     # Honest out-of-sample check: ratings as of the last gameweek with xG,
     # scored against later results that the model had not seen.
@@ -57,14 +79,14 @@ def build(source: str, season: str, now: datetime) -> dict:
     xg_through = max(xg_gws) if xg_gws else 0
     results_through = max((m.gw for m in matches), default=0)
     holdout_from = xg_through + 1 if xg_through < results_through else max(results_through - 2, 1)
-    r_before = model.fit([m for m in matches if m.gw < holdout_from], teams, prior=prior)
+    r_before = model.fit([m for m in matches if m.gw < holdout_from], teams, cfg, prior=prior)
     holdout = []
     for m in (x for x in matches if x.gw >= holdout_from):
-        p = model.predict(m.home, m.away, r_before)
+        p = model.predict(m.home, m.away, r_before, cfg.rho)
         holdout.append(dict(gw=m.gw, home=m.home, away=m.away, hg=m.home_goals, ag=m.away_goals,
                             ph=round(p.p_home, 4), pd=round(p.p_draw, 4), pa=round(p.p_away, 4)))
 
-    r = model.fit(matches, teams, prior=prior)
+    r = model.fit(matches, teams, cfg, prior=prior)
 
     stats = defaultdict(lambda: dict(p=0, w=0, d=0, l=0, gf=0, ga=0, xgf=0.0, xga=0.0, xgp=0, form=""))
     for m in matches:
@@ -89,12 +111,13 @@ def build(source: str, season: str, now: datetime) -> dict:
             "season": season, "source": current.source, "generated": now_iso,
             "results_through_gw": results_through, "xg_through_gw": xg_through,
             "manual_results": filled, "missing": missing,
-            "mu_h": r.mu_home, "mu_a": r.mu_away, "rho": model.RHO, "maxg": model.MAX_GOALS,
-            "prior_games": model.PRIOR_GAMES, "xg_w": model.XG_WEIGHT, "noxg_w": model.NO_XG_WEIGHT,
-            "relegated_last": relegated, "backtest": bt, "holdout_from_gw": holdout_from,
+            "mu_h": r.mu_home, "mu_a": r.mu_away, "rho": cfg.rho, "maxg": model.MAX_GOALS,
+            "prior_games": cfg.prior_games, "xg_w": cfg.xg_weight, "noxg_w": cfg.no_xg_weight,
+            "params": cfg.to_dict(), "relegated_last": prior.relegated, "backtest": backtest,
+            "holdout_from_gw": holdout_from,
         },
         "teams": [dict(name=t, short=current.teams[t], att=round(r.attack[t], 4), dfn=round(r.defence[t], 4),
-                       prior_att=round(prior[t][0], 3), prior_dfn=round(prior[t][1], 3),
+                       prior_att=round(prior.teams[t][0], 3), prior_dfn=round(prior.teams[t][1], 3),
                        promoted=t not in last_teams,
                        **{k: round(v, 2) if isinstance(v, float) else v for k, v in stats[t].items()})
                   for t in sorted(teams)],

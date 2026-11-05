@@ -70,3 +70,21 @@ def test_manual_results_reject_unknown_fixture(tmp_path):
     csv.write_text("gw,home,home_goals,away_goals,away\n1,Arsenal,1,0,Liverpool\n")
     with pytest.raises(ValueError):
         sources.apply_manual_results(s, csv)
+
+
+def test_all_zero_xg_is_treated_as_missing():
+    teams = [{"id": "1", "name": "Arsenal", "short_name": "ARS"}, {"id": "2", "name": "Spurs", "short_name": "TOT"}]
+    fixtures = [{"id": "5", "event": "1", "kickoff_time": "2022-08-06T14:00:00Z", "team_h": "1", "team_a": "2",
+                 "team_h_score": "2", "team_a_score": "0", "finished": "True"}]
+    gws = [{"fixture": "5", "team": "Arsenal", "expected_goals": "0"},
+           {"fixture": "5", "team": "Spurs", "expected_goals": "0.0"}]
+    m = sources.parse_mirror(teams, fixtures, gws).matches()[0]
+    assert m.home_xg is None and m.away_xg is None
+
+
+def test_seasons_without_an_xg_column():
+    teams = [{"id": "1", "name": "Arsenal", "short_name": "ARS"}, {"id": "2", "name": "Spurs", "short_name": "TOT"}]
+    fixtures = [{"id": "5", "event": "1", "kickoff_time": "2021-08-14T14:00:00Z", "team_h": "1", "team_a": "2",
+                 "team_h_score": "1", "team_a_score": "1", "finished": "True"}]
+    m = sources.parse_mirror(teams, fixtures, [{"fixture": "5", "team": "Arsenal"}]).matches()[0]
+    assert (m.home_goals, m.home_xg) == (1, None)
