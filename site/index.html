@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Premier League Predictor</title>
+<meta name="description" content="Win, draw and loss probabilities for every Premier League fixture, from an expected-goals model that updates daily.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314212e'/%3E%3Cpath d='M7 22h4v-6H7zM14 22h4V10h-4zM21 22h4v-9h-4z' fill='%23f2a524'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Premier League 2026–27 · xG model</div>
+    <h1>Match <span>Predictor</span></h1>
+    <p class="muted">Win, draw and loss chances for every fixture, built from expected goals, a home edge and a Poisson scoreline model.</p>
+    <div class="notes" id="notes"></div>
+  </header>
+
+  <nav role="tablist" aria-label="Views">
+    <button role="tab" data-view="gameweek">Gameweek</button>
+    <button role="tab" data-view="matchup">Matchup</button>
+    <button role="tab" data-view="ratings">Team ratings</button>
+    <button role="tab" data-view="record">Track record</button>
+    <button role="tab" data-view="method">How it works</button>
+  </nav>
+
+  <section id="v-gameweek" data-v="gameweek">
+    <div class="toolbar">
+      <h2 id="gw-title">Gameweek</h2>
+      <select id="gw-select" aria-label="Gameweek"></select>
+    </div>
+    <div class="key"><span><i style="background:var(--home)"></i>Home win</span><span><i style="background:var(--draw)"></i>Draw</span><span><i style="background:var(--away)"></i>Away win</span><span>Tap a match for the full breakdown</span></div>
+    <div id="gw-list" class="day"><p class="loading">Loading predictions…</p></div>
+  </section>
+
+  <section id="v-matchup" data-v="matchup" hidden>
+    <div class="picker">
+      <label><span class="eyebrow">Home</span><select id="m-home"></select></label>
+      <div class="vs">v</div>
+      <label><span class="eyebrow">Away</span><select id="m-away"></select></label>
+    </div>
+    <div class="verdict" id="m-verdict"></div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Scoreline chances</h3>
+        <p class="muted" style="font-size:.85rem">Each cell is the chance of that exact score. The outlined cell is the single most likely result.</p>
+        <div class="heat" id="m-heat"></div>
+        <div class="axis-note"><span>Rows: home goals</span><span>Columns: away goals</span></div>
+      </div>
+      <div class="panel">
+        <h3>Match markets</h3>
+        <div class="stats" id="m-stats"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="v-ratings" data-v="ratings" hidden>
+    <div class="toolbar"><h2>Team ratings</h2><span class="muted" style="font-size:.85rem">1.00 = league average · click a column to sort</span></div>
+    <div class="panel scatter-wrap"><svg id="scatter" viewBox="0 0 720 420" width="100%" role="img" aria-label="Attack against defence rating for each team"></svg></div>
+    <div class="panel tablewrap"><table id="r-table"></table></div>
+  </section>
+
+  <section id="v-record" data-v="record" hidden>
+    <h2>Track record</h2>
+    <p class="muted">A model is only worth trusting if it beats a simple guess on matches it has not seen.</p>
+    <div class="kpis" id="kpis"></div>
+    <div class="panel">
+      <h3 id="oos-title">Live test</h3>
+      <p class="muted" id="oos-note" style="font-size:.85rem;margin:4px 0 8px"></p>
+      <div id="oos"></div>
+    </div>
+  </section>
+
+  <section id="v-method" data-v="method" hidden>
+    <h2>How it works</h2>
+    <div class="steps panel">
+      <div class="step"><div class="n">1</div><div><h3>Measure chances, not just goals</h3><p>Every shot gets an <b>expected goals (xG)</b> value: the chance a typical player scores from that position and situation. A penalty is about 0.79 xG; a shot from 30 yards is about 0.03. Summing a team's xG tells you how good its chances were, which predicts future goals better than the goals themselves, because finishing luck evens out.</p><p>The model counts each match as 70% xG and 30% actual goals. Matches where xG isn't available yet count as goals only, at half weight.</p></div></div>
+      <div class="step"><div class="n">2</div><div><h3>Rate attack and defence, adjusted for opponents</h3><p>Each team gets an attack rating (how much it creates compared with average) and a defence rating (how much it concedes compared with average, so lower is better). Scoring two against the bottom side counts for less than two against the best defence, so the ratings are solved together until they settle.</p></div></div>
+      <div class="step"><div class="n">3</div><div><h3>Start from last season, then let this season take over</h3><p>Nine games is a small sample, so each team starts from last season's rating, pulled 25% toward average. That starting point counts like <span id="pg"></span> extra games. As this season's matches pile up, they outweigh it. Promoted sides start from the average of the three teams that went down last season.</p></div></div>
+      <div class="step"><div class="n">4</div><div><h3>Turn ratings into expected goals for this match</h3><p><code>home xG = league home average × home attack × away defence</code>. The away side works the same way with the away average. Home advantage comes from the gap between the two league averages (<span id="mus"></span>).</p></div></div>
+      <div class="step"><div class="n">5</div><div><h3>Turn expected goals into scorelines</h3><p>Goals in football follow a <b>Poisson distribution</b> closely: if a team expects 1.5 goals, there's a 22% chance it scores none, 33% one, 25% two, and so on. Combining both teams gives the chance of every scoreline, and adding up the cells gives win, draw and loss.</p><p>Plain Poisson underrates low-scoring draws, so the model applies the <b>Dixon-Coles</b> correction, a small adjustment to 0–0, 1–0, 0–1 and 1–1 used in academic and betting models.</p></div></div>
+    </div>
+    <div class="panel play">
+      <h3>Try it: Poisson goals</h3>
+      <label for="lam" class="muted" style="font-size:.9rem">Expected goals: <b class="num" id="lam-v"></b></label>
+      <input type="range" id="lam" min="0.2" max="3.5" step="0.1" value="1.5">
+      <div class="pbars" id="pbars"></div>
+    </div>
+    <div class="panel">
+      <h3>What it can't see</h3>
+      <p class="muted">Injuries, suspensions, rotation before European nights, new managers and late team news are all invisible to the model. Treat a 45% favourite as genuinely uncertain: across a season that side loses or draws more often than it wins.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Data from the official Fantasy Premier League API, refreshed daily, with past seasons from the <a href="https://github.com/vaastav/Fantasy-Premier-League">vaastav/Fantasy-Premier-League</a> archive.</p>
+    <p>An independent fan project. Not affiliated with the Premier League or any club. Predictions are probabilities, not guarantees.</p>
+  </footer>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

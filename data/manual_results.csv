@@ -1,0 +1,30 @@
+gw,home,home_goals,away_goals,away
+7,Spurs,3,1,Coventry City
+7,"Nott'm Forest",0,1,Arsenal
+7,Bournemouth,2,0,Sunderland
+7,Brighton,5,0,Crystal Palace
+7,Leeds,1,1,Man Utd
+7,Newcastle,0,1,Aston Villa
+7,Brentford,1,2,Liverpool
+7,Fulham,1,0,Hull City
+7,Man City,3,2,Ipswich Town
+7,Everton,0,2,Chelsea
+8,Sunderland,0,0,Leeds
+8,Crystal Palace,0,2,Newcastle
+8,Hull City,1,1,Brentford
+8,Liverpool,2,0,Brighton
+8,Man Utd,0,3,Bournemouth
+8,Chelsea,0,2,Spurs
+8,Arsenal,2,0,Everton
+8,Coventry City,0,1,Fulham
+8,Aston Villa,2,1,Man City
+8,Ipswich Town,1,1,Nott'm Forest
+9,Aston Villa,1,1,Fulham
+9,Spurs,2,0,Crystal Palace
+9,Bournemouth,2,0,Leeds
+9,Brentford,2,0,Nott'm Forest
+9,Coventry City,3,1,Sunderland
+9,Hull City,2,2,Ipswich Town
+9,Man City,0,1,Brighton
+9,Chelsea,2,0,Man Utd
+9,Liverpool,0,1,Arsenal
