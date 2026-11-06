@@ -1,0 +1,1291 @@
+{
+  "generated": "2026-11-06T00:01:25Z",
+  "model_params": {
+    "xg_weight": 0.7,
+    "no_xg_weight": 0.5,
+    "prior_games": 8,
+    "prior_shrink": 0.75,
+    "mu_prior_games": 0,
+    "rho": -0.08
+  },
+  "mirror_ref": "d7b05b51d137bfefef4b692386d18c610975b9b9",
+  "odds_files": {
+    "2024-25": {
+      "sha256": "d0c8ce4a96d886cf60cf101f570f4a3893844226f91c7bd769eb568c49edbfa4",
+      "rows": 380
+    },
+    "2025-26": {
+      "sha256": "3e3a8352f9ada6789c508d6ca184424421fed56a30400904a4a327c583407e62",
+      "rows": 380
+    }
+  },
+  "matching": {
+    "2024-25": {
+      "fixtures": 380,
+      "odds_rows": 380,
+      "matched": 380,
+      "unmatched_fixtures": [],
+      "unmatched_odds": [],
+      "date_mismatches": [],
+      "score_mismatches": [],
+      "ambiguous": []
+    },
+    "2025-26": {
+      "fixtures": 380,
+      "odds_rows": 380,
+      "matched": 380,
+      "unmatched_fixtures": [],
+      "unmatched_odds": [],
+      "date_mismatches": [],
+      "score_mismatches": [],
+      "ambiguous": []
+    }
+  },
+  "coverage": {
+    "2024-25": {
+      "pinnacle_closing": 380,
+      "average_closing": 380,
+      "bet365_closing": 380
+    },
+    "2025-26": {
+      "pinnacle_closing": 210,
+      "average_closing": 380,
+      "bet365_closing": 380
+    }
+  },
+  "mean_overround": {
+    "pinnacle_closing": 0.029767977812802177,
+    "average_closing": 0.04933787927816108,
+    "bet365_closing": 0.05572537299702392
+  },
+  "comparisons": {
+    "average_closing": {
+      "n": 760,
+      "pooled": {
+        "model": {
+          "n": 760,
+          "log_loss": 0.9991016340498652,
+          "brier": 0.5983354738473458,
+          "accuracy": 0.5184210526315789,
+          "draws": {
+            "actual_rate": 0.25921052631578945,
+            "mean_predicted": 0.2505218077676659,
+            "picked": 0,
+            "recall": 0.0
+          },
+          "goals": {
+            "pred_home": 1.5384688288084347,
+            "actual_home": 1.519736842105263,
+            "pred_away": 1.2981472455260776,
+            "actual_away": 1.3223684210526316
+          },
+          "calibration": [
+            {
+              "bin": "0.0-0.1",
+              "n": 44,
+              "predicted": 0.0756,
+              "observed": 0.0227
+            },
+            {
+              "bin": "0.1-0.2",
+              "n": 277,
+              "predicted": 0.1602,
+              "observed": 0.148
+            },
+            {
+              "bin": "0.2-0.3",
+              "n": 963,
+              "predicted": 0.2546,
+              "observed": 0.2575
+            },
+            {
+              "bin": "0.3-0.4",
+              "n": 371,
+              "predicted": 0.3479,
+              "observed": 0.3747
+            },
+            {
+              "bin": "0.4-0.5",
+              "n": 258,
+              "predicted": 0.4503,
+              "observed": 0.4419
+            },
+            {
+              "bin": "0.5-0.6",
+              "n": 197,
+              "predicted": 0.5428,
+              "observed": 0.5127
+            },
+            {
+              "bin": "0.6-0.7",
+              "n": 120,
+              "predicted": 0.6407,
+              "observed": 0.625
+            },
+            {
+              "bin": "0.7-0.8",
+              "n": 42,
+              "predicted": 0.7457,
+              "observed": 0.8095
+            },
+            {
+              "bin": "0.8-0.9",
+              "n": 8,
+              "predicted": 0.8384,
+              "observed": 0.875
+            }
+          ]
+        },
+        "market": {
+          "n": 760,
+          "log_loss": 0.9892501430756204,
+          "brier": 0.5914623829020672,
+          "accuracy": 0.525,
+          "draws": {
+            "actual_rate": 0.25921052631578945,
+            "mean_predicted": 0.24072941691257682,
+            "picked": 0,
+            "recall": 0.0
+          },
+          "goals": {
+            "pred_home": 1.5384688288084347,
+            "actual_home": 1.519736842105263,
+            "pred_away": 1.2981472455260776,
+            "actual_away": 1.3223684210526316
+          },
+          "calibration": [
+            {
+              "bin": "0.0-0.1",
+              "n": 57,
+              "predicted": 0.0751,
+              "observed": 0.0702
+            },
+            {
+              "bin": "0.1-0.2",
+              "n": 356,
+              "predicted": 0.1582,
+              "observed": 0.1461
+            },
+            {
+              "bin": "0.2-0.3",
+              "n": 898,
+              "predicted": 0.2532,
+              "observed": 0.2673
+            },
+            {
+              "bin": "0.3-0.4",
+              "n": 318,
+              "predicted": 0.3443,
+              "observed": 0.3522
+            },
+            {
+              "bin": "0.4-0.5",
+              "n": 248,
+              "predicted": 0.4467,
+              "observed": 0.4435
+            },
+            {
+              "bin": "0.5-0.6",
+              "n": 192,
+              "predicted": 0.5491,
+              "observed": 0.5052
+            },
+            {
+              "bin": "0.6-0.7",
+              "n": 128,
+              "predicted": 0.6481,
+              "observed": 0.625
+            },
+            {
+              "bin": "0.7-0.8",
+              "n": 65,
+              "predicted": 0.7426,
+              "observed": 0.7385
+            },
+            {
+              "bin": "0.8-0.9",
+              "n": 18,
+              "predicted": 0.8367,
+              "observed": 0.9444
+            }
+          ]
+        },
+        "log_loss_model_minus_market": {
+          "mean": 0.009851490974244781,
+          "ci_low": -0.002504680182789714,
+          "ci_high": 0.021608753574545975
+        },
+        "brier_model_minus_market": {
+          "mean": 0.006873090945278441,
+          "ci_low": -0.0016800849088407265,
+          "ci_high": 0.01507603759307204
+        },
+        "bands": [
+          {
+            "market_band": "0.00-0.20",
+            "n": 413,
+            "market": 0.14676671756062423,
+            "model": 0.17630916532869773,
+            "observed": 0.13559322033898305
+          },
+          {
+            "market_band": "0.20-0.35",
+            "n": 1081,
+            "market": 0.26473172604832385,
+            "model": 0.2733705584495395,
+            "observed": 0.27567067530064754
+          },
+          {
+            "market_band": "0.35-0.50",
+            "n": 383,
+            "market": 0.421654551733865,
+            "model": 0.41683437648695215,
+            "observed": 0.4281984334203655
+          },
+          {
+            "market_band": "0.50-0.65",
+            "n": 262,
+            "market": 0.5695749747942115,
+            "model": 0.5302273094266008,
+            "observed": 0.5343511450381679
+          },
+          {
+            "market_band": "0.65-1.00",
+            "n": 141,
+            "market": 0.7268653409863151,
+            "model": 0.6603093600781814,
+            "observed": 0.723404255319149
+          }
+        ],
+        "disagreement": {
+          "mean_abs_diff": 0.042720901666024165,
+          "slope_model_on_market": 0.8480936255249351,
+          "spread_model": 0.15048083926869188,
+          "spread_market": 0.16562204559257734,
+          "favourite_agreement": 0.8986842105263158
+        }
+      },
+      "per_season": {
+        "2024-25": {
+          "model": {
+            "n": 380,
+            "log_loss": 0.9614300746594336,
+            "brier": 0.5722061108785759,
+            "accuracy": 0.55,
+            "draws": {
+              "actual_rate": 0.24473684210526317,
+              "mean_predicted": 0.24386352465248506,
+              "picked": 0,
+              "recall": 0.0
+            },
+            "goals": {
+              "pred_home": 1.5606167076198398,
+              "actual_home": 1.513157894736842,
+              "pred_away": 1.3781109403578422,
+              "actual_away": 1.4210526315789473
+            },
+            "calibration": [
+              {
+                "bin": "0.0-0.1",
+                "n": 24,
+                "predicted": 0.0738,
+                "observed": 0.0417
+              },
+              {
+                "bin": "0.1-0.2",
+                "n": 151,
+                "predicted": 0.1589,
+                "observed": 0.0993
+              },
+              {
+                "bin": "0.2-0.3",
+                "n": 473,
+                "predicted": 0.253,
+                "observed": 0.2495
+              },
+              {
+                "bin": "0.3-0.4",
+                "n": 169,
+                "predicted": 0.3479,
+                "observed": 0.3787
+              },
+              {
+                "bin": "0.4-0.5",
+                "n": 136,
+                "predicted": 0.4479,
+                "observed": 0.4559
+              },
+              {
+                "bin": "0.5-0.6",
+                "n": 88,
+                "predicted": 0.5422,
+                "observed": 0.5341
+              },
+              {
+                "bin": "0.6-0.7",
+                "n": 71,
+                "predicted": 0.643,
+                "observed": 0.6901
+              },
+              {
+                "bin": "0.7-0.8",
+                "n": 21,
+                "predicted": 0.7447,
+                "observed": 0.8571
+              },
+              {
+                "bin": "0.8-0.9",
+                "n": 7,
+                "predicted": 0.8383,
+                "observed": 0.8571
+              }
+            ]
+          },
+          "market": {
+            "n": 380,
+            "log_loss": 0.9667334134817074,
+            "brier": 0.5751877511794847,
+            "accuracy": 0.5552631578947368,
+            "draws": {
+              "actual_rate": 0.24473684210526317,
+              "mean_predicted": 0.23306656704692177,
+              "picked": 0,
+              "recall": 0.0
+            },
+            "goals": {
+              "pred_home": 1.5606167076198398,
+              "actual_home": 1.513157894736842,
+              "pred_away": 1.3781109403578422,
+              "actual_away": 1.4210526315789473
+            },
+            "calibration": [
+              {
+                "bin": "0.0-0.1",
+                "n": 40,
+                "predicted": 0.0748,
+                "observed": 0.1
+              },
+              {
+                "bin": "0.1-0.2",
+                "n": 202,
+                "predicted": 0.1573,
+                "observed": 0.1436
+              },
+              {
+                "bin": "0.2-0.3",
+                "n": 415,
+                "predicted": 0.2513,
+                "observed": 0.253
+              },
+              {
+                "bin": "0.3-0.4",
+                "n": 152,
+                "predicted": 0.3437,
+                "observed": 0.3553
+              },
+              {
+                "bin": "0.4-0.5",
+                "n": 119,
+                "predicted": 0.4481,
+                "observed": 0.4622
+              },
+              {
+                "bin": "0.5-0.6",
+                "n": 94,
+                "predicted": 0.5521,
+                "observed": 0.5319
+              },
+              {
+                "bin": "0.6-0.7",
+                "n": 60,
+                "predicted": 0.6527,
+                "observed": 0.6333
+              },
+              {
+                "bin": "0.7-0.8",
+                "n": 44,
+                "predicted": 0.7411,
+                "observed": 0.7273
+              },
+              {
+                "bin": "0.8-0.9",
+                "n": 14,
+                "predicted": 0.837,
+                "observed": 0.9286
+              }
+            ]
+          },
+          "log_loss_model_minus_market": {
+            "mean": -0.005303338822273621,
+            "ci_low": -0.0235001183209373,
+            "ci_high": 0.013944847280944158
+          },
+          "brier_model_minus_market": {
+            "mean": -0.002981640300908913,
+            "ci_low": -0.015469469644877784,
+            "ci_high": 0.010195366975589005
+          },
+          "bands": [
+            {
+              "market_band": "0.00-0.20",
+              "n": 242,
+              "market": 0.14365784097890097,
+              "model": 0.17819268640592206,
+              "observed": 0.13636363636363635
+            },
+            {
+              "market_band": "0.20-0.35",
+              "n": 506,
+              "market": 0.2641167839800734,
+              "model": 0.2739102034265286,
+              "observed": 0.2648221343873518
+            },
+            {
+              "market_band": "0.35-0.50",
+              "n": 180,
+              "market": 0.4233626697932011,
+              "model": 0.4168807640019858,
+              "observed": 0.4444444444444444
+            },
+            {
+              "market_band": "0.50-0.65",
+              "n": 123,
+              "market": 0.5699526143843628,
+              "model": 0.5253897502904925,
+              "observed": 0.5528455284552846
+            },
+            {
+              "market_band": "0.65-1.00",
+              "n": 89,
+              "market": 0.7335085130015281,
+              "model": 0.6586216870770264,
+              "observed": 0.7303370786516854
+            }
+          ],
+          "disagreement": {
+            "mean_abs_diff": 0.04466502595287664,
+            "slope_model_on_market": 0.8272334081874092,
+            "spread_model": 0.15643882336531617,
+            "spread_market": 0.17689009852377455,
+            "favourite_agreement": 0.9026315789473685
+          }
+        },
+        "2025-26": {
+          "model": {
+            "n": 380,
+            "log_loss": 1.0367731934402968,
+            "brier": 0.6244648368161156,
+            "accuracy": 0.4868421052631579,
+            "draws": {
+              "actual_rate": 0.2736842105263158,
+              "mean_predicted": 0.25718009088284677,
+              "picked": 0,
+              "recall": 0.0
+            },
+            "goals": {
+              "pred_home": 1.5163209499970294,
+              "actual_home": 1.5263157894736843,
+              "pred_away": 1.2181835506943133,
+              "actual_away": 1.2236842105263157
+            },
+            "calibration": [
+              {
+                "bin": "0.0-0.1",
+                "n": 20,
+                "predicted": 0.0778,
+                "observed": 0.0
+              },
+              {
+                "bin": "0.1-0.2",
+                "n": 126,
+                "predicted": 0.1617,
+                "observed": 0.2063
+              },
+              {
+                "bin": "0.2-0.3",
+                "n": 490,
+                "predicted": 0.2562,
+                "observed": 0.2653
+              },
+              {
+                "bin": "0.3-0.4",
+                "n": 202,
+                "predicted": 0.348,
+                "observed": 0.3713
+              },
+              {
+                "bin": "0.4-0.5",
+                "n": 122,
+                "predicted": 0.4529,
+                "observed": 0.4262
+              },
+              {
+                "bin": "0.5-0.6",
+                "n": 109,
+                "predicted": 0.5434,
+                "observed": 0.4954
+              },
+              {
+                "bin": "0.6-0.7",
+                "n": 49,
+                "predicted": 0.6375,
+                "observed": 0.5306
+              },
+              {
+                "bin": "0.7-0.8",
+                "n": 21,
+                "predicted": 0.7468,
+                "observed": 0.7619
+              },
+              {
+                "bin": "0.8-0.9",
+                "n": 1,
+                "predicted": 0.8388,
+                "observed": 1.0
+              }
+            ]
+          },
+          "market": {
+            "n": 380,
+            "log_loss": 1.0117668726695337,
+            "brier": 0.6077370146246498,
+            "accuracy": 0.49473684210526314,
+            "draws": {
+              "actual_rate": 0.2736842105263158,
+              "mean_predicted": 0.24839226677823184,
+              "picked": 0,
+              "recall": 0.0
+            },
+            "goals": {
+              "pred_home": 1.5163209499970294,
+              "actual_home": 1.5263157894736843,
+              "pred_away": 1.2181835506943133,
+              "actual_away": 1.2236842105263157
+            },
+            "calibration": [
+              {
+                "bin": "0.0-0.1",
+                "n": 17,
+                "predicted": 0.0756,
+                "observed": 0.0
+              },
+              {
+                "bin": "0.1-0.2",
+                "n": 154,
+                "predicted": 0.1595,
+                "observed": 0.1494
+              },
+              {
+                "bin": "0.2-0.3",
+                "n": 483,
+                "predicted": 0.2549,
+                "observed": 0.2795
+              },
+              {
+                "bin": "0.3-0.4",
+                "n": 166,
+                "predicted": 0.3449,
+                "observed": 0.3494
+              },
+              {
+                "bin": "0.4-0.5",
+                "n": 129,
+                "predicted": 0.4453,
+                "observed": 0.4264
+              },
+              {
+                "bin": "0.5-0.6",
+                "n": 98,
+                "predicted": 0.5463,
+                "observed": 0.4796
+              },
+              {
+                "bin": "0.6-0.7",
+                "n": 68,
+                "predicted": 0.644,
+                "observed": 0.6176
+              },
+              {
+                "bin": "0.7-0.8",
+                "n": 21,
+                "predicted": 0.7457,
+                "observed": 0.7619
+              },
+              {
+                "bin": "0.8-0.9",
+                "n": 4,
+                "predicted": 0.8358,
+                "observed": 1.0
+              }
+            ]
+          },
+          "log_loss_model_minus_market": {
+            "mean": 0.025006320770763184,
+            "ci_low": 0.008548605586674318,
+            "ci_high": 0.04107535780733273
+          },
+          "brier_model_minus_market": {
+            "mean": 0.016727822191465794,
+            "ci_low": 0.005187888412450264,
+            "ci_high": 0.028269621465245066
+          },
+          "bands": [
+            {
+              "market_band": "0.00-0.20",
+              "n": 171,
+              "market": 0.15116641424353083,
+              "model": 0.17364359748841532,
+              "observed": 0.13450292397660818
+            },
+            {
+              "market_band": "0.20-0.35",
+              "n": 575,
+              "market": 0.2652728750683842,
+              "model": 0.27289567086978905,
+              "observed": 0.2852173913043478
+            },
+            {
+              "market_band": "0.35-0.50",
+              "n": 203,
+              "market": 0.4201399642920891,
+              "model": 0.4167932447002228,
+              "observed": 0.41379310344827586
+            },
+            {
+              "market_band": "0.50-0.65",
+              "n": 139,
+              "market": 0.5692408045094014,
+              "model": 0.5345080272233009,
+              "observed": 0.5179856115107914
+            },
+            {
+              "market_band": "0.65-1.00",
+              "n": 52,
+              "market": 0.715495296575662,
+              "model": 0.6631978773301582,
+              "observed": 0.7115384615384616
+            }
+          ],
+          "disagreement": {
+            "mean_abs_diff": 0.040776777379171694,
+            "slope_model_on_market": 0.8757849590333612,
+            "spread_model": 0.14427702699354178,
+            "spread_market": 0.15352920574532022,
+            "favourite_agreement": 0.8947368421052632
+          }
+        }
+      }
+    },
+    "pinnacle_closing": {
+      "n": 590,
+      "pooled": {
+        "model": {
+          "n": 590,
+          "log_loss": 0.9822002902254233,
+          "brier": 0.5868245482104708,
+          "accuracy": 0.5322033898305085,
+          "draws": {
+            "actual_rate": 0.25084745762711863,
+            "mean_predicted": 0.24887718003496542,
+            "picked": 0,
+            "recall": 0.0
+          },
+          "goals": {
+            "pred_home": 1.5398868496214368,
+            "actual_home": 1.5372881355932204,
+            "pred_away": 1.3116498968750816,
+            "actual_away": 1.347457627118644
+          },
+          "calibration": [
+            {
+              "bin": "0.0-0.1",
+              "n": 39,
+              "predicted": 0.0763,
+              "observed": 0.0256
+            },
+            {
+              "bin": "0.1-0.2",
+              "n": 230,
+              "predicted": 0.1601,
+              "observed": 0.1304
+            },
+            {
+              "bin": "0.2-0.3",
+              "n": 729,
+              "predicted": 0.2546,
+              "observed": 0.2538
+            },
+            {
+              "bin": "0.3-0.4",
+              "n": 283,
+              "predicted": 0.3472,
+              "observed": 0.371
+            },
+            {
+              "bin": "0.4-0.5",
+              "n": 201,
+              "predicted": 0.4499,
+              "observed": 0.4776
+            },
+            {
+              "bin": "0.5-0.6",
+              "n": 145,
+              "predicted": 0.5437,
+              "observed": 0.4966
+            },
+            {
+              "bin": "0.6-0.7",
+              "n": 100,
+              "predicted": 0.6431,
+              "observed": 0.64
+            },
+            {
+              "bin": "0.7-0.8",
+              "n": 36,
+              "predicted": 0.747,
+              "observed": 0.8611
+            },
+            {
+              "bin": "0.8-0.9",
+              "n": 7,
+              "predicted": 0.8383,
+              "observed": 0.8571
+            }
+          ]
+        },
+        "market": {
+          "n": 590,
+          "log_loss": 0.9739051929119461,
+          "brier": 0.5807924743054873,
+          "accuracy": 0.5389830508474577,
+          "draws": {
+            "actual_rate": 0.25084745762711863,
+            "mean_predicted": 0.23933110756472029,
+            "picked": 0,
+            "recall": 0.0
+          },
+          "goals": {
+            "pred_home": 1.5398868496214368,
+            "actual_home": 1.5372881355932204,
+            "pred_away": 1.3116498968750816,
+            "actual_away": 1.347457627118644
+          },
+          "calibration": [
+            {
+              "bin": "0.0-0.1",
+              "n": 54,
+              "predicted": 0.0745,
+              "observed": 0.0741
+            },
+            {
+              "bin": "0.1-0.2",
+              "n": 298,
+              "predicted": 0.1575,
+              "observed": 0.1409
+            },
+            {
+              "bin": "0.2-0.3",
+              "n": 667,
+              "predicted": 0.2545,
+              "observed": 0.2669
+            },
+            {
+              "bin": "0.3-0.4",
+              "n": 237,
+              "predicted": 0.3413,
+              "observed": 0.3418
+            },
+            {
+              "bin": "0.4-0.5",
+              "n": 198,
+              "predicted": 0.4457,
+              "observed": 0.4747
+            },
+            {
+              "bin": "0.5-0.6",
+              "n": 144,
+              "predicted": 0.5504,
+              "observed": 0.4861
+            },
+            {
+              "bin": "0.6-0.7",
+              "n": 90,
+              "predicted": 0.6491,
+              "observed": 0.6
+            },
+            {
+              "bin": "0.7-0.8",
+              "n": 65,
+              "predicted": 0.7408,
+              "observed": 0.7846
+            },
+            {
+              "bin": "0.8-0.9",
+              "n": 17,
+              "predicted": 0.8402,
+              "observed": 0.9412
+            }
+          ]
+        },
+        "log_loss_model_minus_market": {
+          "mean": 0.008295097313477124,
+          "ci_low": -0.006690843207278269,
+          "ci_high": 0.0235908699282966
+        },
+        "brier_model_minus_market": {
+          "mean": 0.006032073904983439,
+          "ci_low": -0.00418196740848202,
+          "ci_high": 0.016608397944333556
+        },
+        "bands": [
+          {
+            "market_band": "0.00-0.20",
+            "n": 352,
+            "market": 0.14479527210168552,
+            "model": 0.17806602471940566,
+            "observed": 0.13068181818181818
+          },
+          {
+            "market_band": "0.20-0.35",
+            "n": 808,
+            "market": 0.26597567468830996,
+            "model": 0.2743075403781054,
+            "observed": 0.2722772277227723
+          },
+          {
+            "market_band": "0.35-0.50",
+            "n": 294,
+            "market": 0.4218413614338179,
+            "model": 0.4159538746926631,
+            "observed": 0.4523809523809524
+          },
+          {
+            "market_band": "0.50-0.65",
+            "n": 189,
+            "market": 0.5682423341923103,
+            "model": 0.5264174429064379,
+            "observed": 0.5132275132275133
+          },
+          {
+            "market_band": "0.65-1.00",
+            "n": 127,
+            "market": 0.7299571468359303,
+            "model": 0.6606057543645697,
+            "observed": 0.7401574803149606
+          }
+        ],
+        "disagreement": {
+          "mean_abs_diff": 0.0451737078867471,
+          "slope_model_on_market": 0.8382343765888228,
+          "spread_model": 0.15410748120987314,
+          "spread_market": 0.17103516002791266,
+          "favourite_agreement": 0.8932203389830509
+        }
+      },
+      "per_season": {
+        "2024-25": {
+          "model": {
+            "n": 380,
+            "log_loss": 0.9614300746594336,
+            "brier": 0.5722061108785759,
+            "accuracy": 0.55,
+            "draws": {
+              "actual_rate": 0.24473684210526317,
+              "mean_predicted": 0.24386352465248506,
+              "picked": 0,
+              "recall": 0.0
+            },
+            "goals": {
+              "pred_home": 1.5606167076198398,
+              "actual_home": 1.513157894736842,
+              "pred_away": 1.3781109403578422,
+              "actual_away": 1.4210526315789473
+            },
+            "calibration": [
+              {
+                "bin": "0.0-0.1",
+                "n": 24,
+                "predicted": 0.0738,
+                "observed": 0.0417
+              },
+              {
+                "bin": "0.1-0.2",
+                "n": 151,
+                "predicted": 0.1589,
+                "observed": 0.0993
+              },
+              {
+                "bin": "0.2-0.3",
+                "n": 473,
+                "predicted": 0.253,
+                "observed": 0.2495
+              },
+              {
+                "bin": "0.3-0.4",
+                "n": 169,
+                "predicted": 0.3479,
+                "observed": 0.3787
+              },
+              {
+                "bin": "0.4-0.5",
+                "n": 136,
+                "predicted": 0.4479,
+                "observed": 0.4559
+              },
+              {
+                "bin": "0.5-0.6",
+                "n": 88,
+                "predicted": 0.5422,
+                "observed": 0.5341
+              },
+              {
+                "bin": "0.6-0.7",
+                "n": 71,
+                "predicted": 0.643,
+                "observed": 0.6901
+              },
+              {
+                "bin": "0.7-0.8",
+                "n": 21,
+                "predicted": 0.7447,
+                "observed": 0.8571
+              },
+              {
+                "bin": "0.8-0.9",
+                "n": 7,
+                "predicted": 0.8383,
+                "observed": 0.8571
+              }
+            ]
+          },
+          "market": {
+            "n": 380,
+            "log_loss": 0.9664121027623124,
+            "brier": 0.5750793021671526,
+            "accuracy": 0.5526315789473685,
+            "draws": {
+              "actual_rate": 0.24473684210526317,
+              "mean_predicted": 0.23258128826798205,
+              "picked": 0,
+              "recall": 0.0
+            },
+            "goals": {
+              "pred_home": 1.5606167076198398,
+              "actual_home": 1.513157894736842,
+              "pred_away": 1.3781109403578422,
+              "actual_away": 1.4210526315789473
+            },
+            "calibration": [
+              {
+                "bin": "0.0-0.1",
+                "n": 44,
+                "predicted": 0.0742,
+                "observed": 0.0909
+              },
+              {
+                "bin": "0.1-0.2",
+                "n": 208,
+                "predicted": 0.1579,
+                "observed": 0.149
+              },
+              {
+                "bin": "0.2-0.3",
+                "n": 410,
+                "predicted": 0.2524,
+                "observed": 0.2512
+              },
+              {
+                "bin": "0.3-0.4",
+                "n": 140,
+                "predicted": 0.3411,
+                "observed": 0.3643
+              },
+              {
+                "bin": "0.4-0.5",
+                "n": 124,
+                "predicted": 0.4474,
+                "observed": 0.4758
+              },
+              {
+                "bin": "0.5-0.6",
+                "n": 95,
+                "predicted": 0.5528,
+                "observed": 0.5158
+              },
+              {
+                "bin": "0.6-0.7",
+                "n": 55,
+                "predicted": 0.651,
+                "observed": 0.5818
+              },
+              {
+                "bin": "0.7-0.8",
+                "n": 50,
+                "predicted": 0.7412,
+                "observed": 0.76
+              },
+              {
+                "bin": "0.8-0.9",
+                "n": 14,
+                "predicted": 0.843,
+                "observed": 0.9286
+              }
+            ]
+          },
+          "log_loss_model_minus_market": {
+            "mean": -0.0049820281028787605,
+            "ci_low": -0.023689316460168957,
+            "ci_high": 0.014627445333410713
+          },
+          "brier_model_minus_market": {
+            "mean": -0.0028731912885768315,
+            "ci_low": -0.01570480340889797,
+            "ci_high": 0.010426899703800263
+          },
+          "bands": [
+            {
+              "market_band": "0.00-0.20",
+              "n": 252,
+              "market": 0.14328756653636548,
+              "model": 0.18137148893348373,
+              "observed": 0.1388888888888889
+            },
+            {
+              "market_band": "0.20-0.35",
+              "n": 495,
+              "market": 0.26424766870584443,
+              "model": 0.27468236737640805,
+              "observed": 0.26666666666666666
+            },
+            {
+              "market_band": "0.35-0.50",
+              "n": 179,
+              "market": 0.4240352444764067,
+              "model": 0.41467211562106054,
+              "observed": 0.45251396648044695
+            },
+            {
+              "market_band": "0.50-0.65",
+              "n": 122,
+              "market": 0.5693725040798187,
+              "model": 0.521789923303125,
+              "observed": 0.5163934426229508
+            },
+            {
+              "market_band": "0.65-1.00",
+              "n": 92,
+              "market": 0.7361215539611762,
+              "model": 0.6569775391118371,
+              "observed": 0.75
+            }
+          ],
+          "disagreement": {
+            "mean_abs_diff": 0.04622906010340787,
+            "slope_model_on_market": 0.8151226657642573,
+            "spread_model": 0.15643882336531617,
+            "spread_market": 0.17920480120433346,
+            "favourite_agreement": 0.9026315789473685
+          }
+        },
+        "2025-26": {
+          "model": {
+            "n": 210,
+            "log_loss": 1.0197844898210233,
+            "brier": 0.6132769586205663,
+            "accuracy": 0.5,
+            "draws": {
+              "actual_rate": 0.2619047619047619,
+              "mean_predicted": 0.25794950882231077,
+              "picked": 0,
+              "recall": 0.0
+            },
+            "goals": {
+              "pred_home": 1.502375678005279,
+              "actual_home": 1.5809523809523809,
+              "pred_away": 1.1913870562872289,
+              "actual_away": 1.2142857142857142
+            },
+            "calibration": [
+              {
+                "bin": "0.0-0.1",
+                "n": 15,
+                "predicted": 0.0804,
+                "observed": 0.0
+              },
+              {
+                "bin": "0.1-0.2",
+                "n": 79,
+                "predicted": 0.1623,
+                "observed": 0.1899
+              },
+              {
+                "bin": "0.2-0.3",
+                "n": 256,
+                "predicted": 0.2577,
+                "observed": 0.2617
+              },
+              {
+                "bin": "0.3-0.4",
+                "n": 114,
+                "predicted": 0.3462,
+                "observed": 0.3596
+              },
+              {
+                "bin": "0.4-0.5",
+                "n": 65,
+                "predicted": 0.4541,
+                "observed": 0.5231
+              },
+              {
+                "bin": "0.5-0.6",
+                "n": 57,
+                "predicted": 0.546,
+                "observed": 0.4386
+              },
+              {
+                "bin": "0.6-0.7",
+                "n": 29,
+                "predicted": 0.6433,
+                "observed": 0.5172
+              },
+              {
+                "bin": "0.7-0.8",
+                "n": 15,
+                "predicted": 0.7502,
+                "observed": 0.8667
+              }
+            ]
+          },
+          "market": {
+            "n": 210,
+            "log_loss": 0.9874641179446165,
+            "brier": 0.5911305953177118,
+            "accuracy": 0.5142857142857142,
+            "draws": {
+              "actual_rate": 0.2619047619047619,
+              "mean_predicted": 0.2515450662921514,
+              "picked": 0,
+              "recall": 0.0
+            },
+            "goals": {
+              "pred_home": 1.502375678005279,
+              "actual_home": 1.5809523809523809,
+              "pred_away": 1.1913870562872289,
+              "actual_away": 1.2142857142857142
+            },
+            "calibration": [
+              {
+                "bin": "0.0-0.1",
+                "n": 10,
+                "predicted": 0.0757,
+                "observed": 0.0
+              },
+              {
+                "bin": "0.1-0.2",
+                "n": 90,
+                "predicted": 0.1567,
+                "observed": 0.1222
+              },
+              {
+                "bin": "0.2-0.3",
+                "n": 257,
+                "predicted": 0.258,
+                "observed": 0.2918
+              },
+              {
+                "bin": "0.3-0.4",
+                "n": 97,
+                "predicted": 0.3416,
+                "observed": 0.3093
+              },
+              {
+                "bin": "0.4-0.5",
+                "n": 74,
+                "predicted": 0.4429,
+                "observed": 0.473
+              },
+              {
+                "bin": "0.5-0.6",
+                "n": 49,
+                "predicted": 0.5456,
+                "observed": 0.4286
+              },
+              {
+                "bin": "0.6-0.7",
+                "n": 35,
+                "predicted": 0.646,
+                "observed": 0.6286
+              },
+              {
+                "bin": "0.7-0.8",
+                "n": 15,
+                "predicted": 0.7393,
+                "observed": 0.8667
+              },
+              {
+                "bin": "0.8-0.9",
+                "n": 3,
+                "predicted": 0.8271,
+                "observed": 1.0
+              }
+            ]
+          },
+          "log_loss_model_minus_market": {
+            "mean": 0.03232037187640682,
+            "ci_low": 0.010617953871796624,
+            "ci_high": 0.05372244359275194
+          },
+          "brier_model_minus_market": {
+            "mean": 0.022146363302854404,
+            "ci_low": 0.007155486784299551,
+            "ci_high": 0.03735097257766786
+          },
+          "bands": [
+            {
+              "market_band": "0.00-0.20",
+              "n": 100,
+              "market": 0.14859469012629198,
+              "model": 0.1697362548999289,
+              "observed": 0.11
+            },
+            {
+              "market_band": "0.20-0.35",
+              "n": 313,
+              "market": 0.26870846370211315,
+              "model": 0.273714762856828,
+              "observed": 0.28115015974440893
+            },
+            {
+              "market_band": "0.35-0.50",
+              "n": 115,
+              "market": 0.4184265347849188,
+              "model": 0.4179489605519402,
+              "observed": 0.45217391304347826
+            },
+            {
+              "market_band": "0.50-0.65",
+              "n": 67,
+              "market": 0.5661844129046086,
+              "model": 0.5348436726318733,
+              "observed": 0.5074626865671642
+            },
+            {
+              "market_band": "0.65-1.00",
+              "n": 35,
+              "market": 0.7137535623924268,
+              "model": 0.6701427773146097,
+              "observed": 0.7142857142857143
+            }
+          ],
+          "disagreement": {
+            "mean_abs_diff": 0.04326402292326571,
+            "slope_model_on_market": 0.894020047867543,
+            "spread_model": 0.1497966594454118,
+            "spread_market": 0.1551624068582014,
+            "favourite_agreement": 0.8761904761904762
+          }
+        }
+      }
+    }
+  }
+}

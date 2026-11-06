@@ -92,6 +92,7 @@ predictor/
   model.py      Config, ratings, Poisson + Dixon-Coles predictions
   sources.py    official FPL API and community mirror loaders
   evaluate.py   walk-forward evaluation, tuning, test-season guard
+  benchmark.py  closing-odds benchmark against football-data.co.uk
   params.json   production parameters (required)
   build.py      CLI that fits the model and writes the site data
 site/
@@ -126,7 +127,7 @@ Team names must match the FPL names. A manual score is only used while the sourc
 
 Fine-tuning prior strength and ρ is paused. Next, in order:
 
-1. **Bookmaker benchmark:** compare against margin-free bookmaker probabilities, to see how competitive the model is with professional forecasts
+1. ~~**Bookmaker benchmark**~~ done: within about 1% of closing-market log loss on 2024-26, and under-confident on strong favourites. See [the report](experiments/2026-11-05-BOOKMAKER-BENCHMARK.md)
 2. **Recency weighting:** exponential decay across several half-lives, validated chronologically
 3. **Draw modelling:** draw rates moved from 22% to 26–27% between periods; investigate why, and whether pre-match information anticipates it
 4. **Elo baseline**
