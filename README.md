@@ -118,6 +118,7 @@ predictor/
   ledger.py     append-only pre-kickoff forecast ledger
   prospective.py  closing odds recorder and prospective report
   research.py   exploratory studies (not used in production)
+  recency.py    pre-registered recency-weighting study (not used in production)
   params.json   production parameters (required)
   build.py      CLI that fits the model and writes the site data
 site/
@@ -154,7 +155,7 @@ Fine-tuning prior strength and ρ is paused. Next, in order:
 
 1. **Prospective tracking** running from 5 November 2026 (see above)
 1. ~~**Bookmaker benchmark**~~ done: within about 1% of closing-market log loss on 2024-26, and under-confident on strong favourites. See [the report](experiments/2026-11-05-BOOKMAKER-BENCHMARK.md)
-2. **Recency weighting:** exponential decay across several half-lives, validated chronologically
+2. ~~**Recency weighting**~~ done: pre-registered, season-ahead validated; no improvement (−0.0001 log loss [−0.0023, +0.0022]), not nominated. See [the results](experiments/2026-11-06-RECENCY-RESULTS.md)
    - Margin-removal method (proportional, Shin, power) changes the comparison by under 0.001. Temperature scaling failed chronological validation: the model's calibration drifts both ways between seasons, so the gap to the market is about discrimination, not sharpness. See [the research report](experiments/2026-11-05-RESEARCH.md)
 3. **Draw modelling:** draw rates moved from 22% to 26–27% between periods; investigate why, and whether pre-match information anticipates it
 4. **Elo baseline**
