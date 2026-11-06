@@ -44,6 +44,7 @@ UK = ZoneInfo("Europe/London")
 TEAM_NAMES = {
     "Arsenal": "Arsenal", "Aston Villa": "Aston Villa", "Bournemouth": "Bournemouth",
     "Brentford": "Brentford", "Brighton": "Brighton", "Burnley": "Burnley", "Chelsea": "Chelsea",
+    "Coventry": "Coventry City", "Hull": "Hull City",
     "Crystal Palace": "Crystal Palace", "Everton": "Everton", "Fulham": "Fulham",
     "Ipswich": "Ipswich", "Leeds": "Leeds", "Leicester": "Leicester", "Liverpool": "Liverpool",
     "Luton": "Luton", "Man City": "Man City", "Man United": "Man Utd", "Newcastle": "Newcastle",
@@ -51,6 +52,15 @@ TEAM_NAMES = {
     "Southampton": "Southampton", "Sunderland": "Sunderland", "Tottenham": "Spurs",
     "West Ham": "West Ham", "Wolves": "Wolves",
 }
+
+# FPL renames some clubs between seasons (Ipswich in 2024-25, Ipswich Town in 2026-27).
+# Matching compares canonical names on both sides.
+FPL_ALIASES = {"Ipswich Town": "Ipswich"}
+
+
+def canon(name: str) -> str:
+    return FPL_ALIASES.get(name, name)
+
 
 MARKETS = {
     "pinnacle_closing": ("PSCH", "PSCD", "PSCA"),
@@ -139,26 +149,26 @@ def uk_date(kickoff_utc: str) -> str:
 def match(rows: list[Row], kickoffs: dict[tuple[str, str], str], odds_rows: list[OddsRow]) -> MatchReport:
     by_pair: dict[tuple[str, str], list[OddsRow]] = {}
     for o in odds_rows:
-        by_pair.setdefault((o.home, o.away), []).append(o)
+        by_pair.setdefault((canon(o.home), canon(o.away)), []).append(o)
     rep = MatchReport([], [], [], [], [], [])
     seen = set()
     for r in rows:
         key = (r.home, r.away)
-        cands = by_pair.get(key, [])
+        cands = by_pair.get((canon(r.home), canon(r.away)), [])
         label = f"{r.season} GW{r.gw} {r.home} v {r.away}"
         if not cands:
             rep.unmatched_fixtures.append(label); continue
         if len(cands) > 1:
             rep.ambiguous.append(f"{label}: {len(cands)} odds rows (lines {[c.line for c in cands]})"); continue
         o = cands[0]
-        seen.add(key)
+        seen.add((canon(r.home), canon(r.away)))
         if o.date != uk_date(kickoffs[key]):
             rep.date_mismatches.append(f"{label}: odds {o.date}, fixture {uk_date(kickoffs[key])}"); continue
         if (o.home_goals, o.away_goals) != (r.home_goals, r.away_goals):
             rep.score_mismatches.append(f"{label}: odds file {o.home_goals}-{o.away_goals}, FPL {r.home_goals}-{r.away_goals}")
             continue
         rep.matched.append((r, o))
-    rep.unmatched_odds = [f"line {o.line}: {o.date} {o.home} v {o.away}" for o in odds_rows if (o.home, o.away) not in seen]
+    rep.unmatched_odds = [f"line {o.line}: {o.date} {o.home} v {o.away}" for o in odds_rows if (canon(o.home), canon(o.away)) not in seen]
     return rep
 
 

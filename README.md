@@ -81,6 +81,20 @@ python -m predictor.evaluate compare --final   # the held-out test
 
 The site's Track Record page shows a historical walk-forward backtest of 2025-26, plus a live check on the current season.
 
+### Prospective tracking
+
+Historical seasons have all been inspected, so the strongest evidence now comes from forecasts recorded **before** matches are played. Twice a day, the GitHub Action:
+
+1. appends a forecast to `ledger/predictions-<season>.jsonl` for every fixture kicking off in the next 7 days, whenever the forecast has changed. Each record carries the code commit, parameters, data state, timestamp, expected goals and 1X2 probabilities
+2. appends closing odds and results for finished matches to `ledger/market-<season>.jsonl` (football-data.co.uk market-average closing odds)
+3. refuses to commit if any existing ledger line was edited or removed, or any forecast is timestamped after kickoff
+
+The prospective forecast for a match is its last record made before kickoff. The model forecasts hours to days ahead without team news, while closing odds reflect the last minutes before kickoff, so both timestamps are kept. Forecasts from before the ledger started (5 November 2026) are not counted as prospective.
+
+```bash
+python -m predictor.prospective report   # model vs closing market on prospective matches so far
+```
+
 ### Limitations
 
 The model knows nothing about injuries, suspensions, rotation, managerial changes or team news. Ratings are the same for every future fixture; they don't project form changes. Treat probabilities as a baseline, not a tip sheet.
@@ -93,6 +107,8 @@ predictor/
   sources.py    official FPL API and community mirror loaders
   evaluate.py   walk-forward evaluation, tuning, test-season guard
   benchmark.py  closing-odds benchmark against football-data.co.uk
+  ledger.py     append-only pre-kickoff forecast ledger
+  prospective.py  closing odds recorder and prospective report
   params.json   production parameters (required)
   build.py      CLI that fits the model and writes the site data
 site/
@@ -127,6 +143,7 @@ Team names must match the FPL names. A manual score is only used while the sourc
 
 Fine-tuning prior strength and ρ is paused. Next, in order:
 
+1. **Prospective tracking** running from 5 November 2026 (see above)
 1. ~~**Bookmaker benchmark**~~ done: within about 1% of closing-market log loss on 2024-26, and under-confident on strong favourites. See [the report](experiments/2026-11-05-BOOKMAKER-BENCHMARK.md)
 2. **Recency weighting:** exponential decay across several half-lives, validated chronologically
 3. **Draw modelling:** draw rates moved from 22% to 26–27% between periods; investigate why, and whether pre-match information anticipates it

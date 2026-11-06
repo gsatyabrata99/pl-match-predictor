@@ -12,7 +12,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import evaluate, model, sources
+from . import evaluate, ledger, model, sources
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUT = ROOT / "site" / "data" / "predictions.json"
@@ -125,6 +125,13 @@ def build(source: str, season: str, now: datetime) -> dict:
                   for t in sorted(teams)],
         "fixtures": [dict(gw=f.gw, home=f.home, away=f.away, kickoff=f.kickoff) for f in upcoming],
         "holdout": holdout,
+        # Not published on the site; main() hands it to the prospective ledger and drops it.
+        "_ledger": {"season": season, "data": {"source": current.source, "results_through_gw": results_through,
+                                               "xg_through_gw": xg_through},
+                    "params": cfg.to_dict(),
+                    "forecasts": [dict(fixture_id=f.id, gw=f.gw, kickoff=f.kickoff, home=f.home, away=f.away,
+                                       lh=p.home_xg, la=p.away_xg, ph=p.p_home, pd=p.p_draw, pa=p.p_away)
+                                  for f in upcoming for p in [model.predict(f.home, f.away, r, cfg.rho)]]},
     }
 
 
@@ -134,10 +141,17 @@ def main(argv=None) -> None:
     ap.add_argument("--season", help="season, e.g. 2026-27 (default: the season in progress)")
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--now", help="override the current time (ISO 8601), for reproducible builds")
+    ap.add_argument("--ledger", action="store_true",
+                    help="append pre-kickoff forecasts to ledger/ (the daily Action does this)")
     a = ap.parse_args(argv)
     now = datetime.fromisoformat(a.now.replace("Z", "+00:00")) if a.now else datetime.now(timezone.utc)
     now = now.astimezone(timezone.utc)
     data = build(a.source, a.season or season_for(now), now)
+    led = data.pop("_ledger")
+    if a.ledger:
+        n = ledger.record(ledger.predictions_path(led["season"]), led["season"], now, ledger.model_version(),
+                          led["params"], led["data"], led["forecasts"])
+        print(f"Ledger: {n} new pre-kickoff forecasts recorded")
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(data, separators=(",", ":")))
     m = data["meta"]
