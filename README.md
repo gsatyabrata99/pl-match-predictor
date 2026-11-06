@@ -89,10 +89,18 @@ Historical seasons have all been inspected, so the strongest evidence now comes 
 2. appends closing odds and results for finished matches to `ledger/market-<season>.jsonl` (football-data.co.uk market-average closing odds)
 3. refuses to commit if any existing ledger line was edited or removed, or any forecast is timestamped after kickoff
 
-The prospective forecast for a match is its last record made before kickoff. The model forecasts hours to days ahead without team news, while closing odds reflect the last minutes before kickoff, so both timestamps are kept. Forecasts from before the ledger started (5 November 2026) are not counted as prospective.
+Two evaluation tracks are scored against closing odds, each with its lead times and number of eligible fixtures:
+
+- **Latest pre-kickoff:** the last forecast made before kickoff
+- **Fixed 24 hours:** the forecast standing 24 hours before kickoff, for a consistent lead time. Fixtures first forecast less than 24 hours ahead are not eligible
+
+Forecasts are only appended when they change, so the last record before a cutoff is exactly the forecast that was standing then. The model forecasts without team news, while closing odds reflect the last minutes before kickoff. Forecasts from before the ledger started (5 November 2026) are not counted as prospective.
+
+**Integrity.** Runs are serialised, so two never write at once. If someone pushes while a run is in progress, the run rebases onto their work, re-checks the ledger and never force-pushes. Every run, and every push via the Tests workflow, checks the ledger's **whole git history**: any commit that edits or removes an existing line fails the check. `python -m predictor.ledger status` prints coverage, timestamps and missing odds, and the Action prints it on every run.
 
 ```bash
-python -m predictor.prospective report   # model vs closing market on prospective matches so far
+python -m predictor.prospective report   # both tracks vs the closing market so far
+python -m predictor.ledger status        # coverage, timestamps, missing odds
 ```
 
 ### Limitations

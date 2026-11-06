@@ -62,8 +62,13 @@ def record_market(season: str, raw: bytes, url: str, now: datetime, path: Path) 
 
 
 def score(predictions: list[dict], market: list[dict]) -> dict:
-    """Join each fixture's last pre-kickoff forecast to its closing odds and result."""
-    forecasts = ledger.latest_before_kickoff(predictions)
+    """Both evaluation tracks, each against closing odds and results."""
+    return {"latest_pre_kickoff": score_track(ledger.latest_before_kickoff(predictions), market),
+            f"fixed_{ledger.FIXED_HORIZON_HOURS}h": score_track(ledger.fixed_horizon(predictions), market)}
+
+
+def score_track(forecasts: dict[str, dict], market: list[dict]) -> dict:
+    """Join each fixture's forecast on this track to its closing odds and result."""
     by_key = {key(m["home"], m["away"], m["date"]): m for m in market}
     rows, model_p, market_p, lead_hours, unmatched = [], [], [], [], []
     for f in sorted(forecasts.values(), key=lambda r: r["kickoff"]):
@@ -109,13 +114,15 @@ def main(argv=None) -> None:
     out = evaluate.EXPERIMENTS / f"prospective-{season}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"generated": ledger._iso(now), "season": season, **result}, indent=2))
-    c = result.get("comparison")
-    if c:
-        d = c["log_loss_model_minus_market"]
-        print(f"{result['scored']} prospective matches · model log loss {c['model']['log_loss']:.4f} · "
-              f"market {c['market']['log_loss']:.4f} · difference {d['mean']:+.4f} [{d['ci_low']:+.4f}, {d['ci_high']:+.4f}]")
-    else:
-        print(f"{result['forecasts']} forecasts recorded, {result['scored']} scored so far")
+    for track, res in result.items():
+        c = res.get("comparison")
+        if c:
+            d = c["log_loss_model_minus_market"]
+            print(f"{track}: {res['scored']} matches · median lead {res['lead_time_hours']['median']:.0f}h · "
+                  f"model log loss {c['model']['log_loss']:.4f} · market {c['market']['log_loss']:.4f} · "
+                  f"difference {d['mean']:+.4f} [{d['ci_low']:+.4f}, {d['ci_high']:+.4f}]")
+        else:
+            print(f"{track}: {res['forecasts']} eligible forecasts, {res['scored']} scored so far")
 
 
 if __name__ == "__main__":

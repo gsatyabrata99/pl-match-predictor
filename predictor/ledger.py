@@ -100,15 +100,68 @@ def record(path: Path, season: str, now: datetime, version: str, params: dict, d
     return len(new)
 
 
-def latest_before_kickoff(records: list[dict]) -> dict[str, dict]:
-    """The prospective forecast per fixture: the last record made before kickoff."""
+def _dt(iso: str) -> datetime:
+    return datetime.fromisoformat(iso.replace("Z", "+00:00"))
+
+
+def forecast_at(records: list[dict], hours_before: float = 0.0) -> dict[str, dict]:
+    """Per fixture, the forecast standing `hours_before` kickoff: the last record made
+    at or before that moment (strictly before kickoff when hours_before is 0).
+
+    Records are appended only when a forecast changes, so the last record before a
+    cutoff is exactly the forecast that was standing at that cutoff.
+    """
     out = {}
     for rec in records:
-        if rec["predicted_at"] < rec["kickoff"]:
+        cutoff = _dt(rec["kickoff"]) - timedelta(hours=hours_before)
+        made = _dt(rec["predicted_at"])
+        ok = made < cutoff if hours_before == 0 else made <= cutoff
+        if ok:
             cur = out.get(rec["fixture_id"])
             if cur is None or rec["predicted_at"] >= cur["predicted_at"]:
                 out[rec["fixture_id"]] = rec
     return out
+
+
+def latest_before_kickoff(records: list[dict]) -> dict[str, dict]:
+    """Track 1: the last forecast made before kickoff."""
+    return forecast_at(records, 0.0)
+
+
+FIXED_HORIZON_HOURS = 24
+
+
+def fixed_horizon(records: list[dict], hours: float = FIXED_HORIZON_HOURS) -> dict[str, dict]:
+    """Track 2: the forecast standing `hours` before kickoff, for a consistent lead time.
+    Fixtures first forecast less than `hours` ahead are not eligible."""
+    return forecast_at(records, hours)
+
+
+def status(records: list[dict], market: list[dict], now: datetime) -> dict:
+    """Coverage report: fixtures forecast, eligibility per track, timestamps, odds coverage."""
+    by_fixture: dict[str, list[dict]] = {}
+    for r in records:
+        by_fixture.setdefault(r["fixture_id"], []).append(r)
+    latest, fixed = latest_before_kickoff(records), fixed_horizon(records)
+    rows = []
+    for fid, recs in sorted(by_fixture.items(), key=lambda kv: kv[1][0]["kickoff"]):
+        first = min(r["predicted_at"] for r in recs)
+        last = max(r["predicted_at"] for r in recs)
+        k = recs[0]
+        rows.append({"fixture_id": fid, "gw": k["gw"], "match": f"{k['home']} v {k['away']}", "kickoff": k["kickoff"],
+                     "records": len(recs), "first_forecast": first, "last_forecast": last,
+                     "lead_hours_first": round((_dt(k["kickoff"]) - _dt(first)).total_seconds() / 3600, 1),
+                     "fixed_24h_eligible": fid in fixed, "kicked_off": k["kickoff"] <= _iso(now)})
+    played = [r for r in rows if r["kicked_off"]]
+    from .benchmark import canon, uk_date
+    have_odds = {(canon(m["home"]), canon(m["away"]), m["date"]) for m in market}
+    missing_odds = [r["match"] + f" (GW{r['gw']})" for r in played
+                    if (canon(by_fixture[r["fixture_id"]][0]["home"]), canon(by_fixture[r["fixture_id"]][0]["away"]),
+                        uk_date(r["kickoff"])) not in have_odds]
+    return {"checked_at": _iso(now), "records": len(records), "fixtures_forecast": len(rows),
+            "latest_track_eligible": len(latest), "fixed_24h_track_eligible": len(fixed),
+            "kicked_off": len(played), "kicked_off_missing_odds_or_result": missing_odds,
+            "integrity_problems": check_records(records), "fixtures": rows}
 
 
 # ---------------------------------------------------------------- verification
@@ -145,13 +198,56 @@ def verify(base: str | None, root: Path = LEDGER_DIR) -> list[str]:
     return problems
 
 
+def verify_history(root: Path = LEDGER_DIR) -> list[str]:
+    """Check every committed version of every ledger file: each must extend the one before.
+
+    Catches an edit or deletion made by any commit, including a person's push, not
+    just the current run's changes. Needs full git history (fetch-depth: 0 in CI).
+    """
+    problems = []
+    rel_dir = root.relative_to(ROOT).as_posix()
+    files = subprocess.run(["git", "log", "--format=", "--name-only", "--", rel_dir], cwd=ROOT,
+                           capture_output=True, text=True).stdout.split()
+    for rel in sorted(set(f for f in files if f.endswith(".jsonl"))):
+        commits = subprocess.run(["git", "log", "--reverse", "--format=%H", "--", rel], cwd=ROOT,
+                                 capture_output=True, text=True).stdout.split()
+        prev, prev_sha = "", None
+        for sha in commits:
+            cur = subprocess.run(["git", "show", f"{sha}:{rel}"], cwd=ROOT, capture_output=True, text=True)
+            text = cur.stdout if cur.returncode == 0 else ""
+            if not text.startswith(prev):
+                problems.append(f"{rel}: commit {sha[:10]} edited or removed lines that existed at {prev_sha[:10]}")
+            prev, prev_sha = text, sha
+    return problems
+
+
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     v = sub.add_parser("verify", help="check schema, pre-kickoff timestamps and append-only history")
     v.add_argument("--base", help="git ref to compare against, e.g. HEAD")
+    v.add_argument("--history", action="store_true", help="also check every committed version of the ledger")
+    st = sub.add_parser("status", help="print coverage, timestamps and odds coverage")
+    st.add_argument("--season")
     a = ap.parse_args(argv)
-    problems = verify(a.base)
+    if a.cmd == "status":
+        from datetime import timezone
+        from .build import season_for
+        now = datetime.now(timezone.utc)
+        season = a.season or season_for(now)
+        rep = status(read(predictions_path(season)), read(LEDGER_DIR / f"market-{season}.jsonl"), now)
+        print(f"LEDGER STATUS {season} at {rep['checked_at']}")
+        print(f"  records {rep['records']} · fixtures forecast {rep['fixtures_forecast']} · "
+              f"latest-track eligible {rep['latest_track_eligible']} · 24h-track eligible {rep['fixed_24h_track_eligible']}")
+        print(f"  kicked off {rep['kicked_off']} · missing odds/result {len(rep['kicked_off_missing_odds_or_result'])} · "
+              f"integrity problems {len(rep['integrity_problems'])}")
+        for f in rep["fixtures"]:
+            print(f"  GW{f['gw']:>2} {f['kickoff']} {f['match']:<34} records {f['records']} first {f['first_forecast']} "
+                  f"({f['lead_hours_first']}h ahead) 24h-eligible {'yes' if f['fixed_24h_eligible'] else 'no'}")
+        for m in rep["kicked_off_missing_odds_or_result"]:
+            print(f"  awaiting odds/result: {m}")
+        return
+    problems = verify(a.base) + (verify_history() if a.history else [])
     for p in problems:
         print("LEDGER ERROR:", p, file=sys.stderr)
     if problems:

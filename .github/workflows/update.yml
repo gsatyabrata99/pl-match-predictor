@@ -13,6 +13,8 @@ permissions:
   pages: write
   id-token: write
 
+# One run at a time: a scheduled, manual or push-triggered run waits for the
+# previous one to finish, so two runs never write the ledger at once.
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -22,6 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # full history, so a rebase onto a newer main always works
 
       - uses: actions/setup-python@v5
         with:
@@ -34,20 +38,33 @@ jobs:
         run: python -m predictor.prospective market
 
       - name: Verify the ledger is append-only
-        run: python -m predictor.ledger verify --base HEAD
+        run: python -m predictor.ledger verify --base HEAD --history
 
       - name: Commit updated data and ledger
         run: |
+          set -euo pipefail
           git add site/data
           if [ -d ledger ]; then git add ledger; fi
           if git diff --cached --quiet; then
             echo "No changes."
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "Update predictions $(date -u +%Y-%m-%dT%H:%MZ)"
-            git push
+            exit 0
           fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update predictions $(date -u +%Y-%m-%dT%H:%MZ)"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi   # (a failed push is expected here, not fatal)
+            # Someone pushed meanwhile: replay this commit on top of their work, then
+            # re-check that no ledger line on the remote would be changed. Never force-push.
+            git pull --rebase -X theirs origin main || exit 1
+            python -m predictor.ledger verify --base origin/main --history || exit 1
+          done
+          echo "Could not push after 3 attempts; nothing was overwritten." >&2
+          exit 1
+
+      - name: Ledger status
+        if: always()
+        run: python -m predictor.ledger status
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -18,3 +20,5 @@ jobs:
       - run: pip install pytest
       - run: python -m pytest -v
       - run: node --check site/app.js
+      - name: Ledger history is append-only
+        run: python -m predictor.ledger verify --history
