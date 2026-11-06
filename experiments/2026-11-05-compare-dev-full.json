@@ -1,0 +1,622 @@
+{
+  "seasons": [
+    "2022-23",
+    "2023-24"
+  ],
+  "per_season": {
+    "2022-23": {
+      "old": {
+        "n": 380,
+        "log_loss": 0.990850128807653,
+        "brier": 0.589801428931629,
+        "accuracy": 0.5263157894736842,
+        "draws": {
+          "actual_rate": 0.22894736842105262,
+          "mean_predicted": 0.24284176806543295,
+          "picked": 1,
+          "recall": 0.0
+        },
+        "goals": {
+          "pred_home": 1.5946737729627432,
+          "actual_home": 1.6342105263157896,
+          "pred_away": 1.2556239255116115,
+          "actual_away": 1.2184210526315788
+        },
+        "calibration": [
+          {
+            "bin": "0.0-0.1",
+            "n": 52,
+            "predicted": 0.066,
+            "observed": 0.0577
+          },
+          {
+            "bin": "0.1-0.2",
+            "n": 170,
+            "predicted": 0.1577,
+            "observed": 0.1941
+          },
+          {
+            "bin": "0.2-0.3",
+            "n": 431,
+            "predicted": 0.2519,
+            "observed": 0.2483
+          },
+          {
+            "bin": "0.3-0.4",
+            "n": 153,
+            "predicted": 0.3384,
+            "observed": 0.3595
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 117,
+            "predicted": 0.4494,
+            "observed": 0.4103
+          },
+          {
+            "bin": "0.5-0.6",
+            "n": 106,
+            "predicted": 0.5482,
+            "observed": 0.566
+          },
+          {
+            "bin": "0.6-0.7",
+            "n": 62,
+            "predicted": 0.6459,
+            "observed": 0.5806
+          },
+          {
+            "bin": "0.7-0.8",
+            "n": 29,
+            "predicted": 0.7463,
+            "observed": 0.7586
+          },
+          {
+            "bin": "0.8-0.9",
+            "n": 17,
+            "predicted": 0.8384,
+            "observed": 0.7647
+          },
+          {
+            "bin": "0.9-1.0",
+            "n": 3,
+            "predicted": 0.9232,
+            "observed": 1.0
+          }
+        ]
+      },
+      "new": {
+        "n": 380,
+        "log_loss": 0.9859910384739026,
+        "brier": 0.5874830322661638,
+        "accuracy": 0.5210526315789473,
+        "draws": {
+          "actual_rate": 0.22894736842105262,
+          "mean_predicted": 0.22539070576622297,
+          "picked": 0,
+          "recall": 0.0
+        },
+        "goals": {
+          "pred_home": 1.6051253232983418,
+          "actual_home": 1.6342105263157896,
+          "pred_away": 1.2599745216499088,
+          "actual_away": 1.2184210526315788
+        },
+        "calibration": [
+          {
+            "bin": "0.0-0.1",
+            "n": 52,
+            "predicted": 0.068,
+            "observed": 0.0577
+          },
+          {
+            "bin": "0.1-0.2",
+            "n": 197,
+            "predicted": 0.1603,
+            "observed": 0.1827
+          },
+          {
+            "bin": "0.2-0.3",
+            "n": 421,
+            "predicted": 0.2469,
+            "observed": 0.2637
+          },
+          {
+            "bin": "0.3-0.4",
+            "n": 122,
+            "predicted": 0.3419,
+            "observed": 0.3361
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 121,
+            "predicted": 0.452,
+            "observed": 0.4132
+          },
+          {
+            "bin": "0.5-0.6",
+            "n": 102,
+            "predicted": 0.5489,
+            "observed": 0.5588
+          },
+          {
+            "bin": "0.6-0.7",
+            "n": 70,
+            "predicted": 0.646,
+            "observed": 0.6
+          },
+          {
+            "bin": "0.7-0.8",
+            "n": 31,
+            "predicted": 0.7434,
+            "observed": 0.6774
+          },
+          {
+            "bin": "0.8-0.9",
+            "n": 21,
+            "predicted": 0.8343,
+            "observed": 0.7619
+          },
+          {
+            "bin": "0.9-1.0",
+            "n": 3,
+            "predicted": 0.9273,
+            "observed": 1.0
+          }
+        ]
+      },
+      "base_rates": {
+        "n": 380,
+        "log_loss": 1.0546504846060354,
+        "brier": 0.6366759002770083,
+        "accuracy": 0.4842105263157895,
+        "draws": {
+          "actual_rate": 0.22894736842105262,
+          "mean_predicted": 0.23157894736842105,
+          "picked": 0,
+          "recall": 0.0
+        },
+        "goals": {
+          "pred_home": 1.5946737729627432,
+          "actual_home": 1.6342105263157896,
+          "pred_away": 1.2556239255116115,
+          "actual_away": 1.2184210526315788
+        },
+        "calibration": [
+          {
+            "bin": "0.2-0.3",
+            "n": 380,
+            "predicted": 0.2316,
+            "observed": 0.2289
+          },
+          {
+            "bin": "0.3-0.4",
+            "n": 380,
+            "predicted": 0.3395,
+            "observed": 0.2868
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 380,
+            "predicted": 0.4289,
+            "observed": 0.4842
+          }
+        ]
+      }
+    },
+    "2023-24": {
+      "old": {
+        "n": 380,
+        "log_loss": 0.9349642941126018,
+        "brier": 0.5501727093777801,
+        "accuracy": 0.5684210526315789,
+        "draws": {
+          "actual_rate": 0.21578947368421053,
+          "mean_predicted": 0.23115394969229336,
+          "picked": 0,
+          "recall": 0.0
+        },
+        "goals": {
+          "pred_home": 1.7214112489950535,
+          "actual_home": 1.8,
+          "pred_away": 1.42838205740011,
+          "actual_away": 1.4789473684210526
+        },
+        "calibration": [
+          {
+            "bin": "0.0-0.1",
+            "n": 32,
+            "predicted": 0.0765,
+            "observed": 0.0938
+          },
+          {
+            "bin": "0.1-0.2",
+            "n": 173,
+            "predicted": 0.163,
+            "observed": 0.1214
+          },
+          {
+            "bin": "0.2-0.3",
+            "n": 454,
+            "predicted": 0.2473,
+            "observed": 0.2247
+          },
+          {
+            "bin": "0.3-0.4",
+            "n": 143,
+            "predicted": 0.3489,
+            "observed": 0.3357
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 132,
+            "predicted": 0.4471,
+            "observed": 0.4773
+          },
+          {
+            "bin": "0.5-0.6",
+            "n": 103,
+            "predicted": 0.552,
+            "observed": 0.6505
+          },
+          {
+            "bin": "0.6-0.7",
+            "n": 64,
+            "predicted": 0.6491,
+            "observed": 0.7188
+          },
+          {
+            "bin": "0.7-0.8",
+            "n": 30,
+            "predicted": 0.744,
+            "observed": 0.7
+          },
+          {
+            "bin": "0.8-0.9",
+            "n": 9,
+            "predicted": 0.8296,
+            "observed": 1.0
+          }
+        ]
+      },
+      "new": {
+        "n": 380,
+        "log_loss": 0.9347417648187802,
+        "brier": 0.5498275910473427,
+        "accuracy": 0.5842105263157895,
+        "draws": {
+          "actual_rate": 0.21578947368421053,
+          "mean_predicted": 0.21445080323685956,
+          "picked": 0,
+          "recall": 0.0
+        },
+        "goals": {
+          "pred_home": 1.7225729911393473,
+          "actual_home": 1.8,
+          "pred_away": 1.4312974195795305,
+          "actual_away": 1.4789473684210526
+        },
+        "calibration": [
+          {
+            "bin": "0.0-0.1",
+            "n": 30,
+            "predicted": 0.0747,
+            "observed": 0.0333
+          },
+          {
+            "bin": "0.1-0.2",
+            "n": 204,
+            "predicted": 0.1626,
+            "observed": 0.1422
+          },
+          {
+            "bin": "0.2-0.3",
+            "n": 417,
+            "predicted": 0.2394,
+            "observed": 0.223
+          },
+          {
+            "bin": "0.3-0.4",
+            "n": 138,
+            "predicted": 0.3474,
+            "observed": 0.3406
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 133,
+            "predicted": 0.4505,
+            "observed": 0.4812
+          },
+          {
+            "bin": "0.5-0.6",
+            "n": 104,
+            "predicted": 0.5526,
+            "observed": 0.6058
+          },
+          {
+            "bin": "0.6-0.7",
+            "n": 66,
+            "predicted": 0.6477,
+            "observed": 0.7273
+          },
+          {
+            "bin": "0.7-0.8",
+            "n": 36,
+            "predicted": 0.7415,
+            "observed": 0.6667
+          },
+          {
+            "bin": "0.8-0.9",
+            "n": 12,
+            "predicted": 0.832,
+            "observed": 0.9167
+          }
+        ]
+      },
+      "base_rates": {
+        "n": 380,
+        "log_loss": 1.0563449031798182,
+        "brier": 0.6386703601108034,
+        "accuracy": 0.4605263157894737,
+        "draws": {
+          "actual_rate": 0.21578947368421053,
+          "mean_predicted": 0.22894736842105262,
+          "picked": 0,
+          "recall": 0.0
+        },
+        "goals": {
+          "pred_home": 1.7214112489950535,
+          "actual_home": 1.8,
+          "pred_away": 1.42838205740011,
+          "actual_away": 1.4789473684210526
+        },
+        "calibration": [
+          {
+            "bin": "0.2-0.3",
+            "n": 760,
+            "predicted": 0.2579,
+            "observed": 0.2697
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 380,
+            "predicted": 0.4842,
+            "observed": 0.4605
+          }
+        ]
+      }
+    }
+  },
+  "old": {
+    "n": 760,
+    "log_loss": 0.9629072114601275,
+    "brier": 0.5699870691547045,
+    "accuracy": 0.5473684210526316,
+    "draws": {
+      "actual_rate": 0.22236842105263158,
+      "mean_predicted": 0.23699785887886315,
+      "picked": 1,
+      "recall": 0.0
+    },
+    "goals": {
+      "pred_home": 1.6580425109788983,
+      "actual_home": 1.7171052631578947,
+      "pred_away": 1.3420029914558609,
+      "actual_away": 1.3486842105263157
+    },
+    "calibration": [
+      {
+        "bin": "0.0-0.1",
+        "n": 84,
+        "predicted": 0.07,
+        "observed": 0.0714
+      },
+      {
+        "bin": "0.1-0.2",
+        "n": 343,
+        "predicted": 0.1604,
+        "observed": 0.1574
+      },
+      {
+        "bin": "0.2-0.3",
+        "n": 885,
+        "predicted": 0.2495,
+        "observed": 0.2362
+      },
+      {
+        "bin": "0.3-0.4",
+        "n": 296,
+        "predicted": 0.3435,
+        "observed": 0.348
+      },
+      {
+        "bin": "0.4-0.5",
+        "n": 249,
+        "predicted": 0.4482,
+        "observed": 0.4458
+      },
+      {
+        "bin": "0.5-0.6",
+        "n": 209,
+        "predicted": 0.5501,
+        "observed": 0.6077
+      },
+      {
+        "bin": "0.6-0.7",
+        "n": 126,
+        "predicted": 0.6475,
+        "observed": 0.6508
+      },
+      {
+        "bin": "0.7-0.8",
+        "n": 59,
+        "predicted": 0.7451,
+        "observed": 0.7288
+      },
+      {
+        "bin": "0.8-0.9",
+        "n": 26,
+        "predicted": 0.8353,
+        "observed": 0.8462
+      },
+      {
+        "bin": "0.9-1.0",
+        "n": 3,
+        "predicted": 0.9232,
+        "observed": 1.0
+      }
+    ]
+  },
+  "new": {
+    "n": 760,
+    "log_loss": 0.9603664016463415,
+    "brier": 0.5686553116567532,
+    "accuracy": 0.5526315789473685,
+    "draws": {
+      "actual_rate": 0.22236842105263158,
+      "mean_predicted": 0.21992075450154125,
+      "picked": 0,
+      "recall": 0.0
+    },
+    "goals": {
+      "pred_home": 1.6638491572188447,
+      "actual_home": 1.7171052631578947,
+      "pred_away": 1.3456359706147196,
+      "actual_away": 1.3486842105263157
+    },
+    "calibration": [
+      {
+        "bin": "0.0-0.1",
+        "n": 82,
+        "predicted": 0.0705,
+        "observed": 0.0488
+      },
+      {
+        "bin": "0.1-0.2",
+        "n": 401,
+        "predicted": 0.1614,
+        "observed": 0.1621
+      },
+      {
+        "bin": "0.2-0.3",
+        "n": 838,
+        "predicted": 0.2432,
+        "observed": 0.2434
+      },
+      {
+        "bin": "0.3-0.4",
+        "n": 260,
+        "predicted": 0.3448,
+        "observed": 0.3385
+      },
+      {
+        "bin": "0.4-0.5",
+        "n": 254,
+        "predicted": 0.4512,
+        "observed": 0.4488
+      },
+      {
+        "bin": "0.5-0.6",
+        "n": 206,
+        "predicted": 0.5508,
+        "observed": 0.5825
+      },
+      {
+        "bin": "0.6-0.7",
+        "n": 136,
+        "predicted": 0.6468,
+        "observed": 0.6618
+      },
+      {
+        "bin": "0.7-0.8",
+        "n": 67,
+        "predicted": 0.7424,
+        "observed": 0.6716
+      },
+      {
+        "bin": "0.8-0.9",
+        "n": 33,
+        "predicted": 0.8335,
+        "observed": 0.8182
+      },
+      {
+        "bin": "0.9-1.0",
+        "n": 3,
+        "predicted": 0.9273,
+        "observed": 1.0
+      }
+    ]
+  },
+  "base_rates": {
+    "n": 760,
+    "log_loss": 1.0554976938929268,
+    "brier": 0.6376731301939058,
+    "accuracy": 0.4723684210526316,
+    "draws": {
+      "actual_rate": 0.22236842105263158,
+      "mean_predicted": 0.23026315789473684,
+      "picked": 0,
+      "recall": 0.0
+    },
+    "goals": {
+      "pred_home": 1.6580425109788983,
+      "actual_home": 1.7171052631578947,
+      "pred_away": 1.3420029914558609,
+      "actual_away": 1.3486842105263157
+    },
+    "calibration": [
+      {
+        "bin": "0.2-0.3",
+        "n": 1140,
+        "predicted": 0.2491,
+        "observed": 0.2561
+      },
+      {
+        "bin": "0.3-0.4",
+        "n": 380,
+        "predicted": 0.3395,
+        "observed": 0.2868
+      },
+      {
+        "bin": "0.4-0.5",
+        "n": 760,
+        "predicted": 0.4566,
+        "observed": 0.4724
+      }
+    ]
+  },
+  "log_loss_change": {
+    "mean": -0.002540809813786055,
+    "ci_low": -0.0074609846427284715,
+    "ci_high": 0.002310796416400125
+  },
+  "old_params": {
+    "xg_weight": 0.7,
+    "no_xg_weight": 0.5,
+    "prior_games": 8,
+    "prior_shrink": 0.75,
+    "mu_prior_games": 0,
+    "rho": -0.08
+  },
+  "new_params": {
+    "xg_weight": 0.85,
+    "no_xg_weight": 0.5,
+    "prior_games": 4,
+    "prior_shrink": 0.75,
+    "mu_prior_games": 0,
+    "rho": 0.0
+  },
+  "mirror_ref": "d7b05b51d137bfefef4b692386d18c610975b9b9",
+  "dataset_sha256": {
+    "2021-22/teams.csv": "c1dd02ed25fe832b",
+    "2021-22/fixtures.csv": "9fc11cc675ff49dd",
+    "2021-22/gws/merged_gw.csv": "29770bbe305feee6",
+    "2022-23/teams.csv": "be6a1fe120a61f9c",
+    "2022-23/fixtures.csv": "e783060da73700d4",
+    "2022-23/gws/merged_gw.csv": "b78a6d0456141f90",
+    "2023-24/teams.csv": "7795f091ccea17fd",
+    "2023-24/fixtures.csv": "d8521bdbb80edb51",
+    "2023-24/gws/merged_gw.csv": "e9c09c8856f1c86b"
+  },
+  "generated": "2026-11-05T23:39:24Z"
+}

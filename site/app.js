@@ -170,9 +170,11 @@ function renderRecord() {
   const outcome = o => o.hg > o.ag ? "H" : o.hg < o.ag ? "A" : "D";
   const pick = o => [["H", o.ph], ["D", o.pd], ["A", o.pa]].sort((x, y) => y[1] - x[1])[0][0];
   const hits = H.filter(o => pick(o) === outcome(o)).length;
+  document.getElementById("bt-method").textContent =
+    `Historical walk-forward backtest of the ${b.season} season: every gameweek was predicted using only matches played before it, plus ratings carried over from the season before. The model never saw a result before predicting it.`;
   document.getElementById("kpis").innerHTML = [
-    [pct(b.accuracy), "Correct picks, last season", `${b.n} matches, each predicted using only earlier games`],
-    [pct(b.home_accuracy), "Always picking the home team", "The simple guess to beat"],
+    [pct(b.accuracy), `Correct picks, ${b.season} backtest`, `${b.n} matches, each predicted using only earlier games`],
+    [pct(b.home_accuracy), "Always picking the home team", `Same ${b.season} matches: the simple guess to beat`],
     [b.brier.toFixed(3), "Probability error (Brier)", `vs ${b.base_brier.toFixed(3)} for flat base rates. Lower is better`],
     [`${hits}/${H.length}`, `Live test, ${span}`, "Picks correct on unseen matches this season"],
   ].map(([v, l, s]) => `<div class="kpi"><span class="v num">${v}</span><span style="font-weight:600">${l}</span><span class="s">${s}</span></div>`).join("");
@@ -207,6 +209,9 @@ fetch("data/predictions.json", { cache: "no-cache" })
     DATA = d; M = d.meta; T = Object.fromEntries(d.teams.map(t => [t.name, t]));
     rows = d.teams.map(t => ({ ...t, net: t.att / t.dfn, xgfg: t.xgp ? t.xgf / t.xgp : 0, xgag: t.xgp ? t.xga / t.xgp : 0 }));
     document.getElementById("pg").textContent = M.prior_games;
+    document.getElementById("dc-note").innerHTML = M.rho === 0
+      ? "Many models add the <b>Dixon-Coles</b> correction, a small adjustment to 0–0, 1–0, 0–1 and 1–1. In testing on past seasons it didn't improve predictions, so it is currently switched off."
+      : `Plain Poisson can misjudge low-scoring results, so the model applies the <b>Dixon-Coles</b> correction (ρ = ${M.rho}), a small adjustment to 0–0, 1–0, 0–1 and 1–1 used in academic and betting models.`;
     document.getElementById("mus").textContent = `${M.mu_h.toFixed(2)} expected goals at home, ${M.mu_a.toFixed(2)} away`;
     renderNotes(); initGW(); initMatch();
     if (!d.fixtures.length) document.getElementById("gw-list").innerHTML = `<p class="loading">No upcoming fixtures. The season is over.</p>`;

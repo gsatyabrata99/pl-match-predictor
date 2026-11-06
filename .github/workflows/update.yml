@@ -3,6 +3,7 @@ name: Update predictions and deploy
 on:
   schedule:
     - cron: "17 6 * * *"     # daily, 06:17 UTC
+    - cron: "17 16 * * *"    # and 16:17 UTC, so evening kickoffs get a same-day forecast
   push:
     branches: [main]
   workflow_dispatch:
@@ -12,6 +13,8 @@ permissions:
   pages: write
   id-token: write
 
+# One run at a time: a scheduled, manual or push-triggered run waits for the
+# previous one to finish, so two runs never write the ledger at once.
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -21,25 +24,47 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # full history, so a rebase onto a newer main always works
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Fetch data and rebuild predictions
-        run: python -m predictor.build --source auto
+      - name: Fetch data, rebuild predictions, record pre-kickoff forecasts
+        run: python -m predictor.build --source auto --ledger
 
-      - name: Commit updated data
+      - name: Record closing odds and results for finished matches
+        run: python -m predictor.prospective market
+
+      - name: Verify the ledger is append-only
+        run: python -m predictor.ledger verify --base HEAD --history
+
+      - name: Commit updated data and ledger
         run: |
-          if git diff --quiet -- site/data; then
-            echo "No data changes."
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add site/data
-            git commit -m "Update predictions $(date -u +%Y-%m-%d)"
-            git push
+          set -euo pipefail
+          git add site/data
+          if [ -d ledger ]; then git add ledger; fi
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
           fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update predictions $(date -u +%Y-%m-%dT%H:%MZ)"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi   # (a failed push is expected here, not fatal)
+            # Someone pushed meanwhile: replay this commit on top of their work, then
+            # re-check that no ledger line on the remote would be changed. Never force-push.
+            git pull --rebase -X theirs origin main || exit 1
+            python -m predictor.ledger verify --base origin/main --history || exit 1
+          done
+          echo "Could not push after 3 attempts; nothing was overwritten." >&2
+          exit 1
+
+      - name: Ledger status
+        if: always()
+        run: python -m predictor.ledger status
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

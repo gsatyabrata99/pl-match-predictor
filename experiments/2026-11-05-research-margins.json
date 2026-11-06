@@ -1,0 +1,101 @@
+{
+  "generated": "2026-11-06T00:29:56Z",
+  "exploratory": true,
+  "model_params": {
+    "xg_weight": 0.7,
+    "no_xg_weight": 0.5,
+    "prior_games": 8,
+    "prior_shrink": 0.75,
+    "mu_prior_games": 0,
+    "rho": -0.08
+  },
+  "mirror_ref": "d7b05b51d137bfefef4b692386d18c610975b9b9",
+  "average_closing": {
+    "n": 760,
+    "model": {
+      "log_loss": 0.9991016340498652,
+      "brier": 0.5983354738473458,
+      "accuracy": 0.5184210526315789
+    },
+    "proportional": {
+      "log_loss": 0.9892501430756204,
+      "brier": 0.5914623829020672,
+      "accuracy": 0.525,
+      "mean_draw": 0.24072941691257682,
+      "mean_favourite_prob": 0.5314283007934942,
+      "model_minus_market": {
+        "mean": 0.009851490974244781,
+        "ci_low": -0.002504680182789714,
+        "ci_high": 0.021608753574545975
+      }
+    },
+    "shin": {
+      "log_loss": 0.9895228640902689,
+      "brier": 0.5919008098658468,
+      "accuracy": 0.525,
+      "mean_draw": 0.2373391631746214,
+      "mean_favourite_prob": 0.5386208997689701,
+      "model_minus_market": {
+        "mean": 0.009578769959596266,
+        "ci_low": -0.0033011418393523455,
+        "ci_high": 0.021826601803225508
+      }
+    },
+    "power": {
+      "log_loss": 0.9899195981680108,
+      "brier": 0.5922143477148563,
+      "accuracy": 0.525,
+      "mean_draw": 0.23529955535289634,
+      "mean_favourite_prob": 0.5417673573526149,
+      "model_minus_market": {
+        "mean": 0.009182035881854508,
+        "ci_low": -0.004018947145619484,
+        "ci_high": 0.02167586224280885
+      }
+    }
+  },
+  "pinnacle_closing": {
+    "n": 590,
+    "model": {
+      "log_loss": 0.9822002902254233,
+      "brier": 0.5868245482104708,
+      "accuracy": 0.5322033898305085
+    },
+    "proportional": {
+      "log_loss": 0.9739051929119461,
+      "brier": 0.5807924743054873,
+      "accuracy": 0.5389830508474577,
+      "mean_draw": 0.23933110756472029,
+      "mean_favourite_prob": 0.5372330593871444,
+      "model_minus_market": {
+        "mean": 0.008295097313477124,
+        "ci_low": -0.006690843207278269,
+        "ci_high": 0.0235908699282966
+      }
+    },
+    "shin": {
+      "log_loss": 0.9738066201085253,
+      "brier": 0.5808970185013776,
+      "accuracy": 0.5389830508474577,
+      "mean_draw": 0.2371657456310937,
+      "mean_favourite_prob": 0.5419314758023626,
+      "model_minus_market": {
+        "mean": 0.008393670116898006,
+        "ci_low": -0.007144861786490044,
+        "ci_high": 0.02396708617117063
+      }
+    },
+    "power": {
+      "log_loss": 0.9738668811156485,
+      "brier": 0.5809876294811502,
+      "accuracy": 0.5389830508474577,
+      "mean_draw": 0.23581660045682049,
+      "mean_favourite_prob": 0.5439372703291364,
+      "model_minus_market": {
+        "mean": 0.008333409109774686,
+        "ci_low": -0.0074410411257077305,
+        "ci_high": 0.0239926262613574
+      }
+    }
+  }
+}

@@ -52,18 +52,56 @@ The site will be live at `https://<you>.github.io/pl-match-predictor/`. After th
 2. **Ratings.** Each team gets an attack rating and a defence rating, where 1.00 is league average and a lower defence number is better. They are solved jointly and iteratively, so scoring against a strong defence counts for more than scoring against a weak one.
 3. **Prior.** Early-season samples are small, so each team starts from last season's rating pulled 25% toward average. That prior is worth 8 games and fades as this season's games accumulate. Promoted clubs start from the average of last season's bottom three.
 4. **Expected goals for a fixture.** `home λ = league home average × home attack × away defence`, and the same for the away side. The gap between the home and away league averages is the home advantage.
-5. **Scorelines.** Each side's goals are modelled as Poisson with mean λ, using the [Dixon-Coles (1997)](https://doi.org/10.1111/1467-9876.00065) adjustment for low scores. Summing the scoreline grid gives win, draw and loss.
+5. **Scorelines.** Each side's goals are modelled as Poisson with mean λ, using the [Dixon-Coles (1997)](https://doi.org/10.1111/1467-9876.00065) adjustment (ρ = −0.08) for low scores. Summing the scoreline grid gives win, draw and loss.
 
-All tunable constants live at the top of [`predictor/model.py`](predictor/model.py).
+The production parameters are set explicitly in [`predictor/params.json`](predictor/params.json); the build refuses to run without it. The `Config` class in [`predictor/model.py`](predictor/model.py) documents each parameter.
 
-### Performance
+**Production model: v0.1.** A tuned candidate (prior 4 games, ρ = 0) improved development-season log loss but was slightly worse on the held-out seasons (1.0010 against 0.9991), so v0.1 was kept. See [the tuning report](experiments/2026-11-05-REPORT.md) and [the held-out test](experiments/2026-11-05-FINAL-TEST.md).
 
-In a walk-forward test on 2025-26, where each gameweek was predicted using only the matches before it, the model:
+### Evaluation
 
-- picked the correct result **48.6%** of the time, against 42.0% for always backing the home team
-- scored a Brier score of **0.620**, against 0.655 for flat base rates (lower is better)
+Model changes are judged with a fixed, leakage-tested protocol in [`predictor/evaluate.py`](predictor/evaluate.py):
 
-The site also shows a live hold-out test on the current season.
+| Seasons | Role |
+|---|---|
+| 2022-23, 2023-24 | Development: all tuning and model selection |
+| 2024-25, 2025-26 | Test: opened once on 2026-11-05; now previously-inspected data |
+| 2026-27 | Live predictions |
+
+- **Walk-forward predictions.** Each gameweek is predicted from matches that kicked off before that gameweek's first kickoff, plus a prior built only from the previous season. Tests tamper with future results and check earlier predictions don't move.
+- **Primary metric: multiclass log loss.** Brier score, 1X2 accuracy, draw calibration and calibration bins are reported alongside, and model differences come with paired bootstrap confidence intervals.
+- **Reproducible data.** Historical seasons are pinned to an exact commit of the archive and cached locally, and every experiment records file hashes. Experiment reports live in [`experiments/`](experiments/).
+- **Test seasons.** The code refuses to evaluate a test season without `--final`. A model is nominated *before* the test is run, and the test is not used to choose between models. Since 2024-26 has now been inspected, future changes need chronological validation, and new fixtures are the strongest independent check.
+
+```bash
+python -m predictor.evaluate compare           # v0.1 vs params.json on development seasons
+python -m predictor.evaluate tune              # grid search, development seasons only
+python -m predictor.evaluate compare --final   # the held-out test
+```
+
+The site's Track Record page shows a historical walk-forward backtest of 2025-26, plus a live check on the current season.
+
+### Prospective tracking
+
+Historical seasons have all been inspected, so the strongest evidence now comes from forecasts recorded **before** matches are played. Twice a day, the GitHub Action:
+
+1. appends a forecast to `ledger/predictions-<season>.jsonl` for every fixture kicking off in the next 7 days, whenever the forecast has changed. Each record carries the code commit, parameters, data state, timestamp, expected goals and 1X2 probabilities
+2. appends closing odds and results for finished matches to `ledger/market-<season>.jsonl` (football-data.co.uk market-average closing odds)
+3. refuses to commit if any existing ledger line was edited or removed, or any forecast is timestamped after kickoff
+
+Two evaluation tracks are scored against closing odds, each with its lead times and number of eligible fixtures:
+
+- **Latest pre-kickoff:** the last forecast made before kickoff
+- **Fixed 24 hours:** the forecast standing 24 hours before kickoff, for a consistent lead time. Fixtures first forecast less than 24 hours ahead are not eligible
+
+Forecasts are only appended when they change, so the last record before a cutoff is exactly the forecast that was standing then. The model forecasts without team news, while closing odds reflect the last minutes before kickoff. Forecasts from before the ledger started (5 November 2026) are not counted as prospective.
+
+**Integrity.** Runs are serialised, so two never write at once. If someone pushes while a run is in progress, the run rebases onto their work, re-checks the ledger and never force-pushes. Every run, and every push via the Tests workflow, checks the ledger's **whole git history**: any commit that edits or removes an existing line fails the check. `python -m predictor.ledger status` prints coverage, timestamps and missing odds, and the Action prints it on every run.
+
+```bash
+python -m predictor.prospective report   # both tracks vs the closing market so far
+python -m predictor.ledger status        # coverage, timestamps, missing odds
+```
 
 ### Limitations
 
@@ -73,8 +111,14 @@ The model knows nothing about injuries, suspensions, rotation, managerial change
 
 ```
 predictor/
-  model.py      ratings, Poisson + Dixon-Coles predictions, backtest
+  model.py      Config, ratings, Poisson + Dixon-Coles predictions
   sources.py    official FPL API and community mirror loaders
+  evaluate.py   walk-forward evaluation, tuning, test-season guard
+  benchmark.py  closing-odds benchmark against football-data.co.uk
+  ledger.py     append-only pre-kickoff forecast ledger
+  prospective.py  closing odds recorder and prospective report
+  research.py   exploratory studies (not used in production)
+  params.json   production parameters (required)
   build.py      CLI that fits the model and writes the site data
 site/
   index.html    single-page app
@@ -83,7 +127,8 @@ site/
   data/predictions.json   generated, committed by the daily job
 data/
   manual_results.csv      optional: scores the data source doesn't have yet
-tests/                    model, data parsing, and JS/Python parity tests
+tests/                    model, data parsing, leakage, and JS/Python parity tests
+experiments/              tuning and evaluation reports with raw results
 .github/workflows/        tests on every push; daily data refresh + Pages deploy
 ```
 
@@ -105,9 +150,16 @@ Team names must match the FPL names. A manual score is only used while the sourc
 
 ## Roadmap
 
-- FPL tools built on the same ratings: clean sheet odds, attacking returns and captain picks
-- Model tuning: fit ρ, the xG weight and the prior strength by maximum likelihood
-- Recency weighting so recent form counts for more
+Fine-tuning prior strength and ρ is paused. Next, in order:
+
+1. **Prospective tracking** running from 5 November 2026 (see above)
+1. ~~**Bookmaker benchmark**~~ done: within about 1% of closing-market log loss on 2024-26, and under-confident on strong favourites. See [the report](experiments/2026-11-05-BOOKMAKER-BENCHMARK.md)
+2. **Recency weighting:** exponential decay across several half-lives, validated chronologically
+   - Margin-removal method (proportional, Shin, power) changes the comparison by under 0.001. Temperature scaling failed chronological validation: the model's calibration drifts both ways between seasons, so the gap to the market is about discrimination, not sharpness. See [the research report](experiments/2026-11-05-RESEARCH.md)
+3. **Draw modelling:** draw rates moved from 22% to 26–27% between periods; investigate why, and whether pre-match information anticipates it
+4. **Elo baseline**
+5. **Scoring environment:** goals rose from 2.85 to 3.28 a match between 2022-23 and 2023-24. Check how fast the current-season league averages adapt before adding a parameter
+6. FPL tools built on the same ratings: clean sheet odds, attacking returns and captain picks
 
 ## License
 

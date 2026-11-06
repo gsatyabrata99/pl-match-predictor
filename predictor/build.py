@@ -12,11 +12,22 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import model, sources
+from . import evaluate, ledger, model, sources
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUT = ROOT / "site" / "data" / "predictions.json"
 MANUAL = ROOT / "data" / "manual_results.csv"
+# Season shown on the site's Track Record page as a historical walk-forward backtest.
+# The held-out test of 2024-25 and 2025-26 was run on 2026-11-05, so showing it is fine.
+TRACK_RECORD_SEASON = "2025-26"
+
+
+def active_config() -> model.Config:
+    """The production parameters. predictor/params.json is required, so the live model
+    can never change silently because a default in code was edited."""
+    if not evaluate.PARAMS.exists():
+        raise FileNotFoundError(f"{evaluate.PARAMS} is missing; the production config must be explicit")
+    return model.Config.load(evaluate.PARAMS)
 
 
 def previous_season(season: str) -> str:
@@ -47,9 +58,22 @@ def build(source: str, season: str, now: datetime) -> dict:
     matches = current.matches()
     teams = set(current.teams)
 
-    last = sources.load_mirror(previous_season(season)).matches()
-    prior, relegated = model.season_prior(last, teams)
-    bt = model.backtest(last)
+    cfg = active_config()
+    prev = previous_season(season)
+    last = sources.load_mirror(prev).matches()
+    prior = model.season_prior(last, teams, cfg)
+
+    # Track record: a historical backtest, predicted walk-forward exactly as live predictions are made.
+    tr = TRACK_RECORD_SEASON
+    evaluate.guard([tr], final=True)   # displaying results is reporting, not model selection
+    tr_matches, tr_prev = evaluate.load(tr), evaluate.load(previous_season(tr))
+    bt_rows = evaluate.walk_forward(tr, tr_matches, tr_prev, cfg)
+    bt = evaluate.metrics(bt_rows, evaluate.probabilities(bt_rows, cfg.rho))
+    rates = {k: sum(m.outcome == k for m in tr_prev) / len(tr_prev) for k in "HDA"}
+    base = evaluate.metrics(bt_rows, [rates] * len(bt_rows))
+    backtest = {"season": tr, "n": bt["n"], "accuracy": bt["accuracy"], "log_loss": bt["log_loss"],
+                "brier": bt["brier"], "home_accuracy": sum(r.outcome == "H" for r in bt_rows) / len(bt_rows),
+                "base_brier": base["brier"], "base_log_loss": base["log_loss"]}
 
     # Honest out-of-sample check: ratings as of the last gameweek with xG,
     # scored against later results that the model had not seen.
@@ -57,14 +81,14 @@ def build(source: str, season: str, now: datetime) -> dict:
     xg_through = max(xg_gws) if xg_gws else 0
     results_through = max((m.gw for m in matches), default=0)
     holdout_from = xg_through + 1 if xg_through < results_through else max(results_through - 2, 1)
-    r_before = model.fit([m for m in matches if m.gw < holdout_from], teams, prior=prior)
+    r_before = model.fit([m for m in matches if m.gw < holdout_from], teams, cfg, prior=prior)
     holdout = []
     for m in (x for x in matches if x.gw >= holdout_from):
-        p = model.predict(m.home, m.away, r_before)
+        p = model.predict(m.home, m.away, r_before, cfg.rho)
         holdout.append(dict(gw=m.gw, home=m.home, away=m.away, hg=m.home_goals, ag=m.away_goals,
                             ph=round(p.p_home, 4), pd=round(p.p_draw, 4), pa=round(p.p_away, 4)))
 
-    r = model.fit(matches, teams, prior=prior)
+    r = model.fit(matches, teams, cfg, prior=prior)
 
     stats = defaultdict(lambda: dict(p=0, w=0, d=0, l=0, gf=0, ga=0, xgf=0.0, xga=0.0, xgp=0, form=""))
     for m in matches:
@@ -89,17 +113,25 @@ def build(source: str, season: str, now: datetime) -> dict:
             "season": season, "source": current.source, "generated": now_iso,
             "results_through_gw": results_through, "xg_through_gw": xg_through,
             "manual_results": filled, "missing": missing,
-            "mu_h": r.mu_home, "mu_a": r.mu_away, "rho": model.RHO, "maxg": model.MAX_GOALS,
-            "prior_games": model.PRIOR_GAMES, "xg_w": model.XG_WEIGHT, "noxg_w": model.NO_XG_WEIGHT,
-            "relegated_last": relegated, "backtest": bt, "holdout_from_gw": holdout_from,
+            "mu_h": r.mu_home, "mu_a": r.mu_away, "rho": cfg.rho, "maxg": model.MAX_GOALS,
+            "prior_games": cfg.prior_games, "xg_w": cfg.xg_weight, "noxg_w": cfg.no_xg_weight,
+            "params": cfg.to_dict(), "relegated_last": prior.relegated, "backtest": backtest,
+            "holdout_from_gw": holdout_from,
         },
         "teams": [dict(name=t, short=current.teams[t], att=round(r.attack[t], 4), dfn=round(r.defence[t], 4),
-                       prior_att=round(prior[t][0], 3), prior_dfn=round(prior[t][1], 3),
+                       prior_att=round(prior.teams[t][0], 3), prior_dfn=round(prior.teams[t][1], 3),
                        promoted=t not in last_teams,
                        **{k: round(v, 2) if isinstance(v, float) else v for k, v in stats[t].items()})
                   for t in sorted(teams)],
         "fixtures": [dict(gw=f.gw, home=f.home, away=f.away, kickoff=f.kickoff) for f in upcoming],
         "holdout": holdout,
+        # Not published on the site; main() hands it to the prospective ledger and drops it.
+        "_ledger": {"season": season, "data": {"source": current.source, "results_through_gw": results_through,
+                                               "xg_through_gw": xg_through},
+                    "params": cfg.to_dict(),
+                    "forecasts": [dict(fixture_id=f.id, gw=f.gw, kickoff=f.kickoff, home=f.home, away=f.away,
+                                       lh=p.home_xg, la=p.away_xg, ph=p.p_home, pd=p.p_draw, pa=p.p_away)
+                                  for f in upcoming for p in [model.predict(f.home, f.away, r, cfg.rho)]]},
     }
 
 
@@ -109,10 +141,17 @@ def main(argv=None) -> None:
     ap.add_argument("--season", help="season, e.g. 2026-27 (default: the season in progress)")
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--now", help="override the current time (ISO 8601), for reproducible builds")
+    ap.add_argument("--ledger", action="store_true",
+                    help="append pre-kickoff forecasts to ledger/ (the daily Action does this)")
     a = ap.parse_args(argv)
     now = datetime.fromisoformat(a.now.replace("Z", "+00:00")) if a.now else datetime.now(timezone.utc)
     now = now.astimezone(timezone.utc)
     data = build(a.source, a.season or season_for(now), now)
+    led = data.pop("_ledger")
+    if a.ledger:
+        n = ledger.record(ledger.predictions_path(led["season"]), led["season"], now, ledger.model_version(),
+                          led["params"], led["data"], led["forecasts"])
+        print(f"Ledger: {n} new pre-kickoff forecasts recorded")
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(data, separators=(",", ":")))
     m = data["meta"]

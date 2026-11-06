@@ -1,0 +1,31 @@
+{
+  "params": {
+    "xg_weight": 0.7,
+    "no_xg_weight": 0.5,
+    "prior_games": 8,
+    "prior_shrink": 0.75,
+    "mu_prior_games": 0,
+    "rho": -0.08
+  },
+  "status": "production",
+  "version": "v0.1",
+  "decision": "2026-11-05: v0.1 retained after the nominated candidate (prior_games 4, rho 0) did not beat it on the held-out test. See experiments/2026-11-05-FINAL-TEST.md.",
+  "history": [
+    {
+      "version": "v0.1",
+      "params": {
+        "prior_games": 8,
+        "rho": -0.08
+      },
+      "status": "production since initial release"
+    },
+    {
+      "version": "candidate-2026-11-05",
+      "params": {
+        "prior_games": 4,
+        "rho": 0.0
+      },
+      "status": "rejected: held-out log loss 1.0010 vs 0.9991 (commit 3b12340)"
+    }
+  ]
+}

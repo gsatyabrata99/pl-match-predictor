@@ -17,7 +17,7 @@ APP = Path(__file__).resolve().parent.parent / "site" / "app.js"
 def test_js_predict_matches_python():
     src = APP.read_text()
     fn = re.search(r"function predict\(h, a\) \{.*?\n\}\n", src, re.S).group(0)
-    meta = {"mu_h": 1.62, "mu_a": 1.38, "maxg": model.MAX_GOALS, "rho": model.RHO}
+    meta = {"mu_h": 1.62, "mu_a": 1.38, "maxg": model.MAX_GOALS, "rho": model.BASELINE.rho}
     teams = {"A": {"att": 1.31, "dfn": 0.62}, "B": {"att": 0.74, "dfn": 1.18}}
     script = f"const M = {json.dumps(meta)}; const T = {json.dumps(teams)};\n{fn}\n" \
              "const p = predict('A','B'); console.log(JSON.stringify([p.ph, p.pd, p.pa, p.lh, p.la, p.best.slice(0,2)]));"
