@@ -127,7 +127,8 @@ def build(source: str, season: str, now: datetime) -> dict:
         "holdout": holdout,
         # Not published on the site; main() hands it to the prospective ledger and drops it.
         "_ledger": {"season": season, "data": {"source": current.source, "results_through_gw": results_through,
-                                               "xg_through_gw": xg_through},
+                                               "xg_through_gw": xg_through,
+                                               "data_sha256": ledger.data_fingerprint(matches)},
                     "params": cfg.to_dict(),
                     "forecasts": [dict(fixture_id=f.id, gw=f.gw, kickoff=f.kickoff, home=f.home, away=f.away,
                                        lh=p.home_xg, la=p.away_xg, ph=p.p_home, pd=p.p_draw, pa=p.p_away)

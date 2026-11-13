@@ -26,16 +26,46 @@ def test_records_only_upcoming_fixtures_inside_window(tmp_path):
     assert not ledger.check_records(recs)
 
 
-def test_unchanged_forecasts_are_not_duplicated_but_changes_are_appended(tmp_path):
+DATA = {"source": "fpl", "data_sha256": "aaaa"}
+
+
+def test_new_commit_alone_does_not_duplicate_a_forecast(tmp_path):
+    """The GW10 bug: every Action data commit changed the hash and re-recorded everything."""
     path = tmp_path / "p.jsonl"
-    ledger.record(path, "2026-27", NOW, "abc", PARAMS, {}, [fc(1, "2026-11-06T20:00:00Z")])
     later = datetime(2026, 11, 6, 6, 17, tzinfo=timezone.utc)
-    assert ledger.record(path, "2026-27", later, "abc", PARAMS, {}, [fc(1, "2026-11-06T20:00:00Z")]) == 0
-    assert ledger.record(path, "2026-27", later, "abc", PARAMS, {}, [fc(1, "2026-11-06T20:00:00Z", ph=0.52, pd=0.29, pa=0.19)]) == 1
+    assert ledger.record(path, "2026-27", NOW, "commit1", PARAMS, DATA, [fc(1, "2026-11-06T20:00:00Z")]) == 1
+    assert ledger.record(path, "2026-27", later, "commit2", PARAMS, DATA, [fc(1, "2026-11-06T20:00:00Z")]) == 0
+    assert ledger.read(path)[0]["model_version"] == "commit1"
+
+
+@pytest.mark.parametrize("change", ["probabilities", "params", "data"])
+def test_each_defining_input_creates_a_new_record(tmp_path, change):
+    path = tmp_path / "p.jsonl"
+    later = datetime(2026, 11, 6, 6, 17, tzinfo=timezone.utc)
+    ledger.record(path, "2026-27", NOW, "c1", PARAMS, DATA, [fc(1, "2026-11-06T20:00:00Z")])
     before = path.read_text()
-    ledger.record(path, "2026-27", later, "def", PARAMS, {}, [fc(1, "2026-11-06T20:00:00Z", ph=0.52, pd=0.29, pa=0.19)])
+    f = fc(1, "2026-11-06T20:00:00Z", ph=0.52, pd=0.29, pa=0.19) if change == "probabilities" else fc(1, "2026-11-06T20:00:00Z")
+    params = {**PARAMS, "rho": 0.0} if change == "params" else PARAMS
+    data = {**DATA, "data_sha256": "bbbb"} if change == "data" else DATA
+    assert ledger.record(path, "2026-27", later, "c1", params, data, [f]) == 1
     assert path.read_text().startswith(before)          # appended, never rewritten
-    assert ledger.latest_before_kickoff(ledger.read(path))["1"]["model_version"] == "def"
+
+
+def test_schema1_record_is_superseded_once(tmp_path):
+    path = tmp_path / "p.jsonl"
+    ledger.record(path, "2026-27", NOW, "c1", PARAMS, {"source": "fpl"}, [fc(1, "2026-11-06T20:00:00Z")])
+    later = datetime(2026, 11, 6, 6, 17, tzinfo=timezone.utc)
+    assert ledger.record(path, "2026-27", later, "c2", PARAMS, DATA, [fc(1, "2026-11-06T20:00:00Z")]) == 1
+    assert ledger.record(path, "2026-27", later, "c3", PARAMS, DATA, [fc(1, "2026-11-06T20:00:00Z")]) == 0
+
+
+def test_data_fingerprint_tracks_results_and_xg():
+    from predictor.model import Match
+    a = [Match(1, "A", "B", 1, 0, 1.2, 0.4, "2026-08-16T14:00:00Z"), Match(1, "C", "D", 0, 0, None, None, "2026-08-16T14:00:00Z")]
+    assert ledger.data_fingerprint(a) == ledger.data_fingerprint(list(reversed(a)))
+    assert ledger.data_fingerprint(a) != ledger.data_fingerprint(a[:1])
+    b = [Match(1, "A", "B", 1, 0, 1.3, 0.4, "2026-08-16T14:00:00Z"), a[1]]
+    assert ledger.data_fingerprint(a) != ledger.data_fingerprint(b)
 
 
 def test_latest_before_kickoff_ignores_anything_after_kickoff():
