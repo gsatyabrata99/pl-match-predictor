@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FPL Planner</title>
+<meta name="description" content="Expected points, captain picks, transfer targets and fixture difficulty for Fantasy Premier League, built on an xG match model.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314212e'/%3E%3Cpath d='M7 22h4v-6H7zM14 22h4V10h-4zM21 22h4v-9h-4z' fill='%23f2a524'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="sitenav"><a href="./">Match Predictor</a><a href="fpl.html" aria-current="page">FPL Planner</a></div>
+  <header>
+    <div class="eyebrow">Fantasy Premier League 2026–27 · built on the xG match model</div>
+    <h1>FPL <span>Planner</span></h1>
+    <p class="muted">Expected points for every player over the next five gameweeks, from minutes, per-90 output, fixture difficulty and the official scoring rules.</p>
+    <div class="notes" id="notes"></div>
+  </header>
+
+  <nav role="tablist" aria-label="Views">
+    <button role="tab" data-view="captains">Captains</button>
+    <button role="tab" data-view="transfers">Transfers</button>
+    <button role="tab" data-view="fixtures">Fixtures</button>
+    <button role="tab" data-view="myteam">My team</button>
+    <button role="tab" data-view="method">How it works</button>
+  </nav>
+
+  <section data-v="captains">
+    <div class="toolbar">
+      <h2 id="cap-title">Captain picks</h2>
+      <div class="seg" id="cap-pos" role="group" aria-label="Position"></div>
+    </div>
+    <div class="key">
+      <span><i style="background:var(--c-app)"></i>Minutes</span><span><i style="background:var(--c-att)"></i>Goals and assists</span>
+      <span><i style="background:var(--c-def)"></i>Clean sheet, saves, defensive actions</span><span><i style="background:var(--c-bonus)"></i>Bonus</span>
+    </div>
+    <div id="cap-list" class="caps"><p class="loading">Loading projections…</p></div>
+  </section>
+
+  <section data-v="transfers" hidden>
+    <div class="toolbar">
+      <h2>Transfer targets</h2>
+      <div class="filters">
+        <div class="seg" id="tr-pos" role="group" aria-label="Position"></div>
+        <label class="inline">Max price <select id="tr-price"></select></label>
+        <label class="inline"><input type="checkbox" id="tr-fit" checked> Hide flagged players</label>
+      </div>
+    </div>
+    <p class="muted small">Projected points over the next five gameweeks. Click a column to sort. Value is five-week points per £1m.</p>
+    <div class="panel tablewrap"><table id="tr-table" class="ptable"></table></div>
+  </section>
+
+  <section data-v="fixtures" hidden>
+    <div class="toolbar">
+      <h2>Fixture planner</h2>
+      <div class="seg" id="fx-mode" role="group" aria-label="Measure"></div>
+    </div>
+    <p class="muted small" id="fx-note"></p>
+    <div class="panel tablewrap"><table id="fx-table" class="fxgrid"></table></div>
+  </section>
+
+  <section data-v="myteam" hidden>
+    <div class="toolbar">
+      <h2>My team</h2>
+      <div class="filters">
+        <label class="inline">Load team ID <select id="mt-entry"></select></label>
+        <label class="inline">Bank £<input id="mt-bank" type="number" step="0.1" min="0" value="0.0"></label>
+        <button class="btn ghost" id="mt-clear" type="button">Clear squad</button>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Your squad <span class="muted small" id="mt-count"></span></h3>
+        <div id="mt-squad" class="squad"></div>
+        <p class="muted small" id="mt-validity"></p>
+      </div>
+      <div class="panel">
+        <h3>Add players</h3>
+        <input id="mt-search" type="search" placeholder="Search by name or team" autocomplete="off">
+        <div id="mt-results" class="results"></div>
+      </div>
+    </div>
+    <div id="mt-advice" class="grid2"></div>
+  </section>
+
+  <section data-v="method" hidden>
+    <h2>How it works</h2>
+    <div class="steps panel">
+      <div class="step"><div class="n">1</div><div><h3>Minutes</h3><p>How often the player has played, and played 60+ minutes, over his team's last five gameweeks, times FPL's availability flag for injuries and suspensions. Blank gameweeks don't count against him.</p></div></div>
+      <div class="step"><div class="n">2</div><div><h3>Output per minute</h3><p>Season xG, xA, saves, bonus and yellow cards per minute, plus how often he reaches the defensive-contribution threshold (<span id="m-defcon"></span>). Small samples are pulled toward the average for his position, so two lucky games don't make a star.</p></div></div>
+      <div class="step"><div class="n">3</div><div><h3>Fixture difficulty from the match model</h3><p>Attacking output scales with his team's expected goals in each fixture compared with its average. Clean-sheet and goals-conceded chances come straight from the <a href="./#method">match predictor's</a> scoreline grid, so a 2.1 xG team facing a leaky defence is treated very differently from a trip to the league's best.</p></div></div>
+      <div class="step"><div class="n">4</div><div><h3>Official scoring</h3><p>The points per goal, assist, clean sheet and so on are read from the FPL game itself every day, so rule changes are picked up automatically.</p></div></div>
+    </div>
+    <div class="panel">
+      <h3>Does it work?</h3>
+      <p class="muted small">Tested on every gameweek of 2025-26 from GW5, predicting each from earlier data only, with settings fixed before the test and no injury news.</p>
+      <div class="tablewrap"><table class="ptable" id="bt-table">
+        <thead><tr><th></th><th>This model</th><th>Points per game</th><th>Last 5 GWs</th></tr></thead>
+        <tbody>
+          <tr><td>Typical error per player</td><td><b>1.61</b></td><td>1.63</td><td>1.70</td></tr>
+          <tr><td>Ranking accuracy (rank correlation)</td><td><b>0.57</b></td><td>0.56</td><td>0.54</td></tr>
+          <tr><td>Points from its top 11 picks, per GW</td><td><b>53.4</b></td><td>46.7</td><td>42.8</td></tr>
+          <tr><td>Captain's points per GW</td><td>6.4</td><td>6.4</td><td>4.0</td></tr>
+        </tbody>
+      </table></div>
+      <p class="muted small">Better than the obvious alternatives at ranking players, which is what decisions need. Individual gameweeks stay very noisy, and projections above about 4 points ran 0.4–0.8 too high in the test. Read them as a ranking guide, not a promise. <a href="https://github.com/gsatyabrata99/pl-match-predictor/blob/main/experiments/2026-11-13-FPL-BACKTEST.md">Full report</a>.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Player data from the official Fantasy Premier League API, refreshed twice daily. Team strengths from the <a href="./">match predictor</a>.</p>
+    <p>An independent fan project. Not affiliated with the Premier League or Fantasy Premier League. Expected points are estimates, not guarantees.</p>
+  </footer>
+</div>
+<script src="fpl.js"></script>
+</body>
+</html>

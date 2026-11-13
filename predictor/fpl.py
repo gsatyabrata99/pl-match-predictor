@@ -348,6 +348,41 @@ def load_live(pause: float = 0.3) -> tuple[dict, list, dict]:
     return bootstrap, fixtures, live
 
 
+# ---------------------------------------------------------------- team IDs
+TEAM_IDS = ROOT / "data" / "fpl_team_ids.txt"
+
+
+def read_team_ids(path: Path = TEAM_IDS) -> list[str]:
+    """One FPL team ID per line; blank lines and # comments ignored."""
+    if not path.exists():
+        return []
+    ids = []
+    for line in path.read_text().splitlines():
+        line = line.split("#", 1)[0].strip()
+        if line:
+            if not line.isdigit():
+                raise ValueError(f"{path}: {line!r} is not a numeric FPL team ID")
+            ids.append(line)
+    return ids
+
+
+def fetch_entries(ids: list[str], current_gw: int) -> dict:
+    """Latest squad and bank for each team ID (public FPL data, fetched server-side
+    because the FPL API doesn't allow browsers on other sites to call it)."""
+    out = {}
+    for i in ids:
+        try:
+            entry = _get_json(f"entry/{i}/")
+            picks = _get_json(f"entry/{i}/event/{current_gw}/picks/")
+        except Exception as e:
+            print(f"Team {i}: could not fetch ({e})", file=sys.stderr)
+            continue
+        out[i] = {"name": entry.get("name") or i, "gw": current_gw,
+                  "picks": [p["element"] for p in picks.get("picks", [])],
+                  "bank": (picks.get("entry_history") or {}).get("bank", 0)}
+    return out
+
+
 # ---------------------------------------------------------------- CLI
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -366,6 +401,9 @@ def main(argv=None) -> None:
         return
     data = build(bootstrap, fixtures, live, predictions, datetime.now(timezone.utc))
     a.out.write_text(json.dumps(data, separators=(",", ":")))
+    current = next((e["id"] for e in bootstrap["events"] if e.get("is_current")), None)
+    entries = fetch_entries(read_team_ids(), current) if current else {}
+    (a.out.parent / "fpl-teams.json").write_text(json.dumps({"entries": entries}, separators=(",", ":")))
     top = sorted(data["players"], key=lambda p: -p["xp"][0])[:3] if data["players"] and data["meta"]["gws"] else []
     print(f"Wrote {a.out} · GW{data['meta']['next_gw']} · {len(data['players'])} players · top: "
           + ", ".join(f"{p['name']} {p['xp'][0]:.1f}" for p in top))

@@ -83,3 +83,13 @@ def test_scoring_reads_api_and_falls_back():
                                                             "assists": 3, "long_play": 2}}})
     assert sc["goals_scored"]["MID"] == 5 and sc["assists"] == 3 and sc["clean_sheets"] == SC["clean_sheets"]
     assert fpl.scoring_from_api({}) == SC
+
+
+def test_team_ids_file(tmp_path):
+    f = tmp_path / "ids.txt"
+    f.write_text("# comment\n123456\n\n 98765  # mine\n")
+    assert fpl.read_team_ids(f) == ["123456", "98765"]
+    assert fpl.read_team_ids(tmp_path / "missing.txt") == []
+    f.write_text("my team\n")
+    with pytest.raises(ValueError):
+        fpl.read_team_ids(f)

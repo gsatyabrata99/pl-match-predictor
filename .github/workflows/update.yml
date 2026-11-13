@@ -34,6 +34,9 @@ jobs:
       - name: Fetch data, rebuild predictions, record pre-kickoff forecasts
         run: python -m predictor.build --source auto --ledger
 
+      - name: Build FPL projections (reads the predictions just built)
+        run: python -m predictor.fpl
+
       - name: Record closing odds and results for finished matches
         run: python -m predictor.prospective market
 
