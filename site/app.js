@@ -10,12 +10,17 @@ function predict(h, a) {
   G[0][0] *= 1 - lh * la * rho; G[0][1] *= 1 + lh * rho; G[1][0] *= 1 + la * rho; G[1][1] *= 1 - rho;
   const s = G.flat().reduce((x, y) => x + y, 0); G = G.map(r => r.map(v => v / s));
   let ph = 0, pa = 0, o25 = 0, btts = 0, best = [0, 0, 0];
+  const bestBy = { H: [0, 0, 0], D: [0, 0, 0], A: [0, 0, 0] };   // likeliest score within each result
   G.forEach((r, i) => r.forEach((v, j) => {
     if (i > j) ph += v; else if (i < j) pa += v;
     if (i + j > 2) o25 += v; if (i > 0 && j > 0) btts += v;
     if (v > best[2]) best = [i, j, v];
+    const k = i > j ? "H" : i < j ? "A" : "D";
+    if (v > bestBy[k][2]) bestBy[k] = [i, j, v];
   }));
-  return { lh, la, G, ph, pa, pd: 1 - ph - pa, o25, btts, csH: G.reduce((x, r) => x + r[0], 0), csA: G[0].reduce((x, y) => x + y, 0), best };
+  const pd = 1 - ph - pa;
+  const fav = ph >= pd && ph >= pa ? "H" : pa >= pd ? "A" : "D";      // most likely result
+  return { lh, la, G, ph, pa, pd, o25, btts, csH: G.reduce((x, r) => x + r[0], 0), csA: G[0].reduce((x, y) => x + y, 0), best, bestBy, fav };
 }
 
 /* header notes */
@@ -48,6 +53,15 @@ function bar(p) {
   const seg = (cls, v) => `<div class="${cls}" style="width:${(v * 100).toFixed(1)}%">${v >= .12 ? pct(v) : ""}</div>`;
   return `<div class="bar">${seg("h", p.ph)}${seg("d", p.pd)}${seg("a", p.pa)}</div>`;
 }
+// When the single likeliest score has a different result from the most likely result
+// (e.g. 1–1 is the top cell but a home win is 53%), name the favourite's likeliest score.
+function favLine(p, h, a) {
+  const outcomeOf = ([i, j]) => i > j ? "H" : i < j ? "A" : "D";
+  if (p.fav === "D" || outcomeOf(p.best) === p.fav) return "";
+  const b = p.bestBy[p.fav], who = esc(T[p.fav === "H" ? h : a].short);
+  return `<div class="fav">${who} win · ${b[0]}–${b[1]}</div>`;
+}
+
 function renderGW() {
   const g = +gwSel.value, list = DATA.fixtures.filter(f => f.gw === g);
   document.getElementById("gw-title").textContent = `Gameweek ${g}`;
@@ -61,7 +75,7 @@ function renderGW() {
     html += `<button class="fx" data-h="${f.home}" data-a="${f.away}">
       <div class="teams"><span class="t">${f.home}<small>${time}</small></span><span class="t">${f.away}</span></div>
       <div class="probs">${bar(p)}<div class="bar-legend"><span class="num">xG ${p.lh.toFixed(2)}</span><span class="num">${p.la.toFixed(2)} xG</span></div></div>
-      <div class="score"><div class="big num">${p.best[0]}–${p.best[1]}</div><div class="lbl">likeliest score</div></div>
+      <div class="score"><div class="big num">${p.best[0]}–${p.best[1]}</div><div class="lbl">likeliest score</div>${favLine(p, f.home, f.away)}</div>
     </button>`;
   }
   document.getElementById("gw-list").innerHTML = html;
@@ -87,9 +101,9 @@ function renderMatch() {
   }
   const p = predict(h, a);
   document.getElementById("m-verdict").innerHTML =
-    `<div class="home"><span class="eyebrow">${T[h].short} win</span><span class="p num">${pct(p.ph)}</span><span class="muted num" style="font-size:.85rem">xG ${p.lh.toFixed(2)}</span></div>
-     <div class="draw"><span class="eyebrow">Draw</span><span class="p num">${pct(p.pd)}</span><span class="muted" style="font-size:.85rem">likeliest ${p.best[0]}–${p.best[1]}</span></div>
-     <div class="away"><span class="eyebrow">${T[a].short} win</span><span class="p num">${pct(p.pa)}</span><span class="muted num" style="font-size:.85rem">xG ${p.la.toFixed(2)}</span></div>`;
+    `<div class="home"><span class="eyebrow">${T[h].short} win</span><span class="p num">${pct(p.ph)}</span><span class="muted num" style="font-size:.85rem">likeliest ${p.bestBy.H[0]}–${p.bestBy.H[1]} · xG ${p.lh.toFixed(2)}</span></div>
+     <div class="draw"><span class="eyebrow">Draw</span><span class="p num">${pct(p.pd)}</span><span class="muted num" style="font-size:.85rem">likeliest ${p.bestBy.D[0]}–${p.bestBy.D[1]}</span></div>
+     <div class="away"><span class="eyebrow">${T[a].short} win</span><span class="p num">${pct(p.pa)}</span><span class="muted num" style="font-size:.85rem">likeliest ${p.bestBy.A[0]}–${p.bestBy.A[1]} · xG ${p.la.toFixed(2)}</span></div>`;
   const max = p.best[2];
   let heat = `<div></div>` + [0,1,2,3,4,5].map(j => `<div class="ax">${j}${j === 5 ? "+" : ""}</div>`).join("");
   for (let i = 0; i <= 5; i++) {
