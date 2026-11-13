@@ -85,7 +85,7 @@ The site's Track Record page shows a historical walk-forward backtest of 2025-26
 
 Historical seasons have all been inspected, so the strongest evidence now comes from forecasts recorded **before** matches are played. Twice a day, the GitHub Action:
 
-1. appends a forecast to `ledger/predictions-<season>.jsonl` for every fixture kicking off in the next 7 days, whenever the forecast has changed. Each record carries the code commit, parameters, data state, timestamp, expected goals and 1X2 probabilities
+1. appends a forecast to `ledger/predictions-<season>.jsonl` for every fixture kicking off in the next 7 days, when the model configuration, the input data (a fingerprint of all results and xG) or the probabilities differ from the fixture's last record. Each record carries the code commit (for audit only), parameters, data fingerprint, timestamp, expected goals and 1X2 probabilities
 2. appends closing odds and results for finished matches to `ledger/market-<season>.jsonl` (football-data.co.uk market-average closing odds)
 3. refuses to commit if any existing ledger line was edited or removed, or any forecast is timestamped after kickoff
 

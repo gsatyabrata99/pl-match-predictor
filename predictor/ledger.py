@@ -27,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 LEDGER_DIR = ROOT / "ledger"
 WINDOW_DAYS = 7
-SCHEMA = 1
+SCHEMA = 2   # 2: adds data["data_sha256"]; duplicates are judged without the commit hash
 REQUIRED = {"schema", "fixture_id", "season", "gw", "kickoff", "home", "away", "predicted_at",
             "model_version", "params", "params_sha256", "data", "expected_goals", "probabilities"}
 
@@ -60,6 +60,22 @@ def read(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
+def is_same_forecast(prev: dict, probs: dict, phash: str, data_hash: str | None) -> bool:
+    """Fixture + model configuration + input-data fingerprint + probabilities.
+    A previous record without a fingerprint (schema 1) never counts as the same."""
+    prev_data = prev.get("data", {}).get("data_sha256")
+    return (prev["probabilities"] == probs and prev["params_sha256"] == phash
+            and data_hash is not None and prev_data == data_hash)
+
+
+def data_fingerprint(matches) -> str:
+    """Hash of every input the ratings are fitted on: results and xG of finished matches."""
+    rows = sorted((m.kickoff, m.home, m.away, m.home_goals, m.away_goals,
+                   None if m.home_xg is None else round(m.home_xg, 4),
+                   None if m.away_xg is None else round(m.away_xg, 4)) for m in matches)
+    return hashlib.sha256(json.dumps(rows).encode()).hexdigest()[:16]
+
+
 def _iso(dt: datetime) -> str:
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -69,22 +85,25 @@ def record(path: Path, season: str, now: datetime, version: str, params: dict, d
     """Append forecasts for fixtures kicking off within WINDOW_DAYS of `now`.
 
     Each forecast: fixture_id, gw, kickoff, home, away, lh, la, ph, pd, pa.
-    A record is only added when the forecast or model differs from the last one
-    recorded for that fixture. Returns the number of records appended.
+    A record is added only when something that defines the forecast differs from
+    the last record for that fixture: the model configuration (params_sha256), the
+    input data (data["data_sha256"]) or the probabilities. The commit hash is stored
+    for audit but does not by itself create a new record, since every data commit
+    by the Action changes it. Returns the number of records appended.
     """
     now_iso, horizon = _iso(now), _iso(now + timedelta(days=WINDOW_DAYS))
     last = {}
     for rec in read(path):
         last[rec["fixture_id"]] = rec
     phash = params_hash(params)
+    data_hash = data_state.get("data_sha256")
     new = []
     for f in forecasts:
         if not (now_iso < f["kickoff"] <= horizon):
             continue
         probs = {"H": round(f["ph"], 6), "D": round(f["pd"], 6), "A": round(f["pa"], 6)}
         prev = last.get(str(f["fixture_id"]))
-        if prev and prev["probabilities"] == probs and prev["params_sha256"] == phash \
-                and prev["model_version"].split("-")[0] == version.split("-")[0]:
+        if prev and is_same_forecast(prev, probs, phash, data_hash):
             continue
         new.append({
             "schema": SCHEMA, "fixture_id": str(f["fixture_id"]), "season": season, "gw": f["gw"],
