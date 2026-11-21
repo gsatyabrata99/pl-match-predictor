@@ -227,3 +227,11 @@ input:focus-visible, .seg button:focus-visible, .btn:focus-visible, .slot:focus-
   .cap .cn-ret { grid-area: p; justify-items: start; }
   .fxmini { justify-content: flex-start; }
 }
+
+.chiptable td.pick { font-weight: 700; color: var(--accent-ink); background: color-mix(in oklab, var(--accent) 14%, var(--surface)); }
+.chiptable td, .chiptable th { text-align: right; }
+.chiptable td:first-child, .chiptable th:first-child, .chiptable td:last-child, .chiptable th:last-child { text-align: left; }
+#ch-have { margin: 4px 0 8px; }
+#ch-wc-out { margin-top: 12px; }
+section > * { min-width: 0; }               /* grid children never stretch a section past the screen */
+#ch-body { display: grid; gap: 20px; }

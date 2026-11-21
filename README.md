@@ -18,12 +18,13 @@ A second page, `fpl.html`, turns the match model into Fantasy Premier League too
 - **Transfers:** every player's projection over the next five gameweeks, with value per £1m, filters and fixtures
 - **Fixtures:** a five-gameweek planner coloured by the model's expected goals or clean-sheet chance
 - **My team:** build your 15-man squad (saved in your browser) or load it by team ID; get the best XI, captain and best single transfers
+- **Chips:** for each chip you still hold in the current half (they expire at GW19 and GW38), the projected value of playing it in every remaining gameweek, a one-chip-per-gameweek plan, and a wildcard preview showing the rebuilt squad. A loaded team's used chips come from its FPL history
 
 Expected points per fixture combine minutes (recent team gameweeks plus FPL's injury flags), per-minute xG, xA, saves, bonus and defensive-contribution rates shrunk toward positional averages, and the match model's expected goals and scoreline grid for fixture difficulty. Points come from the official scoring table in the FPL API. The match predictor is not changed: FPL projections read its published ratings.
 
 **Backtest (2025-26, GW5–38, constants fixed beforehand):** typical error 1.61 points against 1.63 for points-per-game and 1.70 for last-5 form; its top 11 picks scored 53.4 a gameweek against 46.7 and 42.8. Projections above about 4 points run 0.4–0.8 high. See [the report](experiments/2026-11-13-FPL-BACKTEST.md).
 
-**Load your team by ID:** add it to [`data/fpl_team_ids.txt`](data/fpl_team_ids.txt). The FPL API doesn't let browsers on other sites read it, so the daily Action fetches it server-side. Teams are public on FPL, and a listed team also appears on this site.
+**Load your team by ID:** the page remembers the team you choose and switches to its new squad automatically once FPL publishes it after each deadline. Add IDs to [`data/fpl_team_ids.txt`](data/fpl_team_ids.txt). The FPL API doesn't let browsers on other sites read it, so the daily Action fetches it server-side. Teams are public on FPL, and a listed team also appears on this site.
 
 Later-gameweek availability is a heuristic: players flagged out with 0% are assumed half likely to be back the following week and fully back after that.
 
