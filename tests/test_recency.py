@@ -16,7 +16,8 @@ def test_decay_weights():
 def test_no_decay_is_identical_to_production_walk_forward():
     a = evaluate.walk_forward("x", THIS, LAST, BASELINE)
     b = recency.walk_forward("x", THIS, LAST, BASELINE, None)
-    assert [(r.lh, r.la) for r in a] == pytest.approx([(r.lh, r.la) for r in b], abs=1e-12)
+    flat = lambda rows: [x for r in rows for x in (r.lh, r.la)]     # pytest 9 rejects nested approx
+    assert flat(a) == pytest.approx(flat(b), abs=1e-12)
 
 
 def test_uniform_decay_changes_nothing_because_prior_ratio_is_preserved():
