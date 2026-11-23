@@ -121,6 +121,10 @@ python -m predictor.prospective report   # both tracks vs the closing market so 
 python -m predictor.ledger status        # coverage, timestamps, missing odds
 ```
 
+### Team-news archive
+
+FPL publishes each player's injury status, chance of playing and news live, but keeps no history. Every run appends any changed flags to `ledger/team-news-<season>.jsonl` (the first run recorded everyone), so the team news that was public before any match can be reconstructed later (`predictor.teamnews.as_of`). This is the groundwork for testing whether team news improves the match predictor; it does not change any forecast. The ledger's append-only history check covers it.
+
 ### Limitations
 
 The model knows nothing about injuries, suspensions, rotation, managerial changes or team news. Ratings are the same for every future fixture; they don't project form changes. Treat probabilities as a baseline, not a tip sheet.
@@ -138,6 +142,7 @@ predictor/
   research.py   exploratory studies (not used in production)
   recency.py    pre-registered recency-weighting study (not used in production)
   fpl.py        FPL expected points (reads the published ratings)
+  teamnews.py   append-only archive of FPL injury and availability flags
   fpl_backtest.py  walk-forward FPL backtest
   params.json   production parameters (required)
   build.py      CLI that fits the model and writes the site data

@@ -416,7 +416,13 @@ def main(argv=None) -> None:
         # Keep the last good file rather than publishing projections built on nothing.
         print(f"FPL API unavailable ({e}); keeping the existing {a.out.name}", file=sys.stderr)
         return
-    data = build(bootstrap, fixtures, live, predictions, datetime.now(timezone.utc))
+    now = datetime.now(timezone.utc)
+    # Archive this run's team news first: it is the one input that can't be recovered later.
+    from . import teamnews
+    from .build import season_for
+    n = teamnews.record(teamnews.path_for(season_for(now)), bootstrap, now)
+    print(f"Team news: {n} player flag changes recorded")
+    data = build(bootstrap, fixtures, live, predictions, now)
     a.out.write_text(json.dumps(data, separators=(",", ":")))
     current = next((e["id"] for e in bootstrap["events"] if e.get("is_current")), None)
     entries = fetch_entries(read_team_ids(), current) if current else {}
