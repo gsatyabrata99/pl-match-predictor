@@ -123,7 +123,7 @@ python -m predictor.ledger status        # coverage, timestamps, missing odds
 
 ### Team-news archive
 
-FPL publishes each player's injury status, chance of playing and news live, but keeps no history. Every run appends any changed flags to `ledger/team-news-<season>.jsonl` (the first run recorded everyone), so the team news that was public before any match can be reconstructed later (`predictor.teamnews.as_of`). This is the groundwork for testing whether team news improves the match predictor; it does not change any forecast. The ledger's append-only history check covers it.
+FPL publishes each player's injury status, chance of playing and news live, but keeps no history. Every run appends any changed flags to `ledger/team-news-<season>.jsonl` (the first run recorded everyone), so the team news that was public before any match can be reconstructed later (`predictor.teamnews.as_of`). It does not change any forecast. A pre-registered test of the ceiling (would knowing the actual starting XIs have helped?) found it did not, through an attack-side lineup adjustment: log loss +0.0023 [−0.0041, +0.0091], so building team news into the predictor was stopped. See [the results](experiments/2026-11-22-LINEUP-RESULTS.md). The archive keeps running for any future, separately registered approach. The ledger's append-only history check covers it.
 
 ### Limitations
 
@@ -143,6 +143,7 @@ predictor/
   recency.py    pre-registered recency-weighting study (not used in production)
   fpl.py        FPL expected points (reads the published ratings)
   teamnews.py   append-only archive of FPL injury and availability flags
+  lineup.py     pre-registered lineup-ceiling study (not used in production)
   fpl_backtest.py  walk-forward FPL backtest
   params.json   production parameters (required)
   build.py      CLI that fits the model and writes the site data
