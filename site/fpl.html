@@ -26,6 +26,7 @@
     <button role="tab" data-view="transfers">Transfers</button>
     <button role="tab" data-view="fixtures">Fixtures</button>
     <button role="tab" data-view="myteam">My team</button>
+    <button role="tab" data-view="chips">Chips</button>
     <button role="tab" data-view="method">How it works</button>
   </nav>
 
@@ -77,6 +78,7 @@
         <h3>Your squad <span class="muted small" id="mt-count"></span></h3>
         <div id="mt-squad" class="squad"></div>
         <p class="muted small" id="mt-validity"></p>
+        <p class="small" id="mt-loaded" role="status"></p>
       </div>
       <div class="panel">
         <h3>Add players</h3>
@@ -85,6 +87,16 @@
       </div>
     </div>
     <div id="mt-advice" class="grid2"></div>
+  </section>
+
+  <section data-v="chips" hidden>
+    <div class="toolbar">
+      <h2>Chip planner</h2>
+      <span class="chip" id="ch-window"></span>
+    </div>
+    <p class="muted" id="ch-intro"></p>
+    <div class="filters" id="ch-have"></div>
+    <div id="ch-body"></div>
   </section>
 
   <section data-v="method" hidden>
@@ -116,6 +128,7 @@
     <p>An independent fan project. Not affiliated with the Premier League or Fantasy Premier League. Expected points are estimates, not guarantees.</p>
   </footer>
 </div>
+<script src="chips.js"></script>
 <script src="fpl.js"></script>
 </body>
 </html>

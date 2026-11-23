@@ -93,3 +93,18 @@ def test_team_ids_file(tmp_path):
     f.write_text("my team\n")
     with pytest.raises(ValueError):
         fpl.read_team_ids(f)
+
+
+WINDOWS = [{"name": n, "start": a, "stop": b} for n in ("wildcard", "freehit", "bboost", "3xc")
+           for a, b in ((2 if n in ("wildcard", "freehit") else 1, 19), (20, 38))]
+
+
+def test_plan_gameweeks_cover_the_current_chip_window():
+    assert fpl.plan_gameweeks(11, WINDOWS, 38) == list(range(11, 20))     # to the GW19 expiry
+    assert fpl.plan_gameweeks(17, WINDOWS, 38) == list(range(17, 22))     # never shorter than the horizon
+    assert fpl.plan_gameweeks(36, WINDOWS, 38) == [36, 37, 38]            # stops at the last gameweek
+
+
+def test_chip_windows_read_from_api():
+    b = {"chips": [{"name": "bboost", "start_event": 1, "stop_event": 19, "number": 1}]}
+    assert fpl.chip_windows(b) == [{"name": "bboost", "start": 1, "stop": 19}]

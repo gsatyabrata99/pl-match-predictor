@@ -10,7 +10,7 @@ const store = {
 };
 
 /* ---------------------------------------------------------------- routing */
-const VIEWS = ["captains", "transfers", "fixtures", "myteam", "method"];
+const VIEWS = ["captains", "transfers", "fixtures", "myteam", "chips", "method"];
 function show() {
   const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "captains";
   document.querySelectorAll("[data-v]").forEach(s => s.hidden = s.dataset.v !== v);
@@ -204,7 +204,94 @@ function renderAdvice() {
         : `<p class="muted small">No single transfer improves your next-${D.meta.gws.length} projection within your bank.</p>`}
       <p class="small muted">Uses current prices. FPL sells at your purchase price plus half of any rise, so adjust the bank if needed. An extra transfer costs 4 points, so take one only if the gain beats that.</p></div>`;
 }
-function renderMyTeam() { renderSquad(); renderResults(); renderAdvice(); }
+function renderMyTeam() { renderSquad(); renderResults(); renderAdvice(); renderChips(); }
+
+/* ---------------------------------------------------------------- chips */
+const CHIP_ORDER = ["wildcard", "freehit", "bboost", "3xc"];
+let wcResult = null;
+function chipWindow() { return D.meta.chips.find(w => w.start <= D.meta.next_gw && D.meta.next_gw <= w.stop); }
+function loadedEntry() { const id = store.get("fpl-entry", ""); return ENTRIES[id] ? ENTRIES[id] : null; }
+function heldChips() {
+  const win = D.meta.chips.filter(w => w.start <= D.meta.next_gw && D.meta.next_gw <= w.stop);
+  const saved = store.get("fpl-chips", null);
+  if (saved && saved.window === chipWindow()?.stop) return new Set(saved.held);
+  const e = loadedEntry();
+  return new Set(Chips.availableChips(win, e ? e.chips_used : [], D.meta.next_gw).map(w => w.name));
+}
+function renderChips() {
+  const body = document.getElementById("ch-body"), win = chipWindow();
+  if (!win) { body.innerHTML = `<p class="muted">No chip window is open.</p>`; return; }
+  const left = win.stop - D.meta.next_gw + 1;
+  document.getElementById("ch-window").innerHTML = `Use by <b>GW${win.stop}</b> · ${left} gameweek${left === 1 ? "" : "s"} left`;
+  const held = heldChips();
+  const names = CHIP_ORDER.filter(n => D.meta.chips.some(w => w.name === n && w.start <= D.meta.next_gw && D.meta.next_gw <= w.stop));
+  document.getElementById("ch-have").innerHTML = `<span class="small muted">Chips you still have:</span>` + names.map(n =>
+    `<label class="inline"><input type="checkbox" data-chip="${n}" ${held.has(n) ? "checked" : ""}> ${Chips.NAMES[n]}</label>`).join("");
+  document.querySelectorAll("#ch-have input").forEach(cb => cb.onchange = () => {
+    const h = [...document.querySelectorAll("#ch-have input:checked")].map(x => x.dataset.chip);
+    store.set("fpl-chips", { window: win.stop, held: h }); wcResult = null; renderChips();
+  });
+  const e = loadedEntry();
+  document.getElementById("ch-intro").textContent = `Chips from this half expire after GW${win.stop}, and only one chip can be played per gameweek. ` +
+    (e ? `Chips ticked below come from ${e.name}'s FPL history; untick any you've used since.` : `Tick the chips you still have.`);
+
+  const sp = squad.map(id => BY_ID[id]).filter(Boolean);
+  if (sp.length !== 15 || squadProblems(squad).length) {
+    body.innerHTML = `<div class="panel"><p class="muted">Load or build your 15-man squad on the <a href="#myteam">My team</a> tab first. The planner scores each chip against your own players.</p></div>`;
+    return;
+  }
+  const gws = D.meta.plan_gws, idx = gws.map((g, i) => i).filter(i => gws[i] >= win.start && gws[i] <= win.stop);
+  const bank = +document.getElementById("mt-bank").value || 0;
+  const vals = Chips.chipValues(P, sp, bank, idx, D.meta.team_limit);
+  const timed = ["bboost", "freehit", "3xc"].filter(n => held.has(n));
+  const plan = Chips.assign(vals, timed).plan;               // chip -> position in idx
+  const cell = (n, k) => {
+    if (!held.has(n)) return `<td class="muted">–</td>`;
+    const v = vals[n][k], pick = plan[n] === k;
+    return `<td class="${pick ? "pick" : ""}">${pick ? "★ " : ""}${f1(v)}</td>`;
+  };
+  const cards = timed.map(n => {
+    const k = plan[n], gw = gws[idx[k]];
+    const why = { bboost: `your bench is projected ${f1(vals.bboost[k])} points`,
+                  freehit: `a one-week squad would beat your XI by about ${f1(vals.freehit[k])} points`,
+                  "3xc": `your captain is projected ${f1(vals["3xc"][k])}, scored a third time` }[n];
+    return `<div class="kpi"><span class="eyebrow">${Chips.NAMES[n]}</span><span class="v num">GW${gw}</span><span class="s">${why}</span></div>`;
+  });
+  if (held.has("wildcard")) {
+    const bbGw = plan.bboost !== undefined ? gws[idx[plan.bboost]] : null;
+    cards.push(`<div class="kpi"><span class="eyebrow">Wildcard</span><span class="v num">${bbGw && bbGw > D.meta.next_gw ? `By GW${bbGw - 1}` : `By GW${win.stop}`}</span>
+      <span class="s">${bbGw && bbGw > D.meta.next_gw ? "Before your Bench Boost, so the new 15 is the one boosted." : "Any free week before it expires."} See what it would change below.</span></div>`);
+  }
+  body.innerHTML = `
+    <div class="kpis">${cards.join("") || `<div class="kpi"><span class="s">No chips left in this window.</span></div>`}</div>
+    <div class="panel tablewrap"><h3>Chip value by gameweek <span class="muted small">projected points the chip adds, ★ = recommended</span></h3>
+      <table class="ptable chiptable"><thead><tr><th>Gameweek</th><th>Bench Boost</th><th>Free Hit</th><th>Triple Captain</th><th>Your captain</th></tr></thead><tbody>
+      ${idx.map((i, k) => { const l = Chips.lineup(sp, i); return `<tr><td class="name">GW${gws[i]}</td>${cell("bboost", k)}${cell("freehit", k)}${cell("3xc", k)}<td>${esc(l.cap.name)} <span class="muted small">${f1(Chips.xpAt(l.cap, i))}</span></td></tr>`; }).join("")}
+      </tbody></table></div>
+    ${held.has("wildcard") ? `<div class="panel" id="ch-wc"><h3>Wildcard preview</h3>
+      <p class="muted small">Rebuilds your squad for the next ${Math.min(5, idx.length)} gameweeks with your current budget. Takes a few seconds.</p>
+      <button class="btn" type="button" id="ch-wc-run">Plan a wildcard</button><div id="ch-wc-out"></div></div>` : ""}
+    <p class="muted small">Values come from the same expected points as the rest of the planner, so they assume your squad as it is now and get less reliable further ahead. They update twice a day as fixtures, injuries and your squad change, so check again each week before playing a chip. There are no double or blank gameweeks scheduled this half; if FPL announces one, the planner picks it up automatically.</p>`;
+  const run = document.getElementById("ch-wc-run");
+  if (run) run.onclick = () => {
+    run.disabled = true; run.textContent = "Working…";
+    setTimeout(() => {
+      const wIdx = idx.slice(0, 5);
+      wcResult = Chips.wildcard(P, sp, bank, wIdx, D.meta.team_limit);
+      showWildcard(wcResult, idx, plan, gws); run.textContent = "Recalculate"; run.disabled = false;
+    }, 30);
+  };
+  if (wcResult) showWildcard(wcResult, idx, plan, gws);
+}
+function showWildcard(w, idx, plan, gws) {
+  const out = document.getElementById("ch-wc-out"); if (!out) return;
+  if (!w.changes.length) { out.innerHTML = `<p class="small muted">A wildcard wouldn't improve your projections meaningfully right now. Hold it.</p>`; return; }
+  const bbK = plan.bboost, bbNote = bbK !== undefined
+    ? ` Your Bench Boost in GW${gws[idx[bbK]]} would be worth ${f1(Chips.lineup(w.squad, idx[bbK]).benchValue)} with this squad, against ${f1(Chips.lineup(squad.map(id => BY_ID[id]), idx[bbK]).benchValue)} now.` : "";
+  out.innerHTML = `<p><b>+${f1(w.gain)}</b> projected points over the next ${Math.min(5, idx.length)} gameweeks from ${w.changes.length} changes, leaving £${w.bank.toFixed(1)}m in the bank.${bbNote}</p>
+    ${w.changes.map(c => `<div class="move"><span><span class="out">${esc(c.out.name)}</span> → <b>${esc(c.in.name)}</b> <span class="small muted">${short(c.in.team)} · ${c.in.pos} · £${c.in.price.toFixed(1)}</span></span><span class="num gain">+${f1(c.gain)}</span></div>`).join("")}
+    <p class="small muted">A wildcard is worth playing when the gain is well beyond what your free transfers could achieve; compare with the Best single transfers on My team.</p>`;
+}
 
 /* ---------------------------------------------------------------- boot */
 function renderNotes() {
@@ -245,12 +332,23 @@ fetch("data/fpl.json", { cache: "no-cache" })
     const ids = Object.keys(ENTRIES);
     sel.innerHTML = `<option value="">${ids.length ? "Choose…" : "None configured"}</option>` + ids.map(id => `<option value="${esc(id)}">${esc(ENTRIES[id].name || id)}</option>`).join("");
     sel.disabled = !ids.length;
-    sel.onchange = () => {
-      const e = ENTRIES[sel.value]; if (!e) return;
-      squad = e.picks.filter(id => BY_ID[id]);
+    const loadEntry = (id, note) => {
+      const e = ENTRIES[id]; if (!e) return;
+      squad = e.picks.filter(x => BY_ID[x]);
       document.getElementById("mt-bank").value = (e.bank / 10).toFixed(1);
+      store.set("fpl-entry", id); store.set("fpl-entry-gw", e.gw); store.set("fpl-chips", null);
       saveSquad(); renderMyTeam();
+      document.getElementById("mt-loaded").textContent = note || `Loaded ${e.name}'s squad from the GW${e.gw} deadline.`;
     };
+    sel.onchange = () => loadEntry(sel.value);
+    // Remember the chosen team and refresh it automatically once FPL publishes a newer squad.
+    const remembered = store.get("fpl-entry", "");
+    if (ENTRIES[remembered]) {
+      sel.value = remembered;
+      if (ENTRIES[remembered].gw > store.get("fpl-entry-gw", 0))
+        loadEntry(remembered, `Updated to ${ENTRIES[remembered].name}'s squad from the GW${ENTRIES[remembered].gw} deadline.`);
+    }
+    renderChips();
   })
   .catch(e => {
     document.getElementById("cap-list").innerHTML = `<p class="loading">Couldn't load projections (${esc(e.message)}). If you opened this file directly, serve the folder instead: <code>python -m http.server -d site</code></p>`;

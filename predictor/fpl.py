@@ -259,6 +259,18 @@ def scoring_from_api(bootstrap: dict) -> dict:
     return sc
 
 
+def chip_windows(bootstrap: dict) -> list[dict]:
+    """Chips as the FPL API defines them: [{name, start, stop}], one entry per chip per half."""
+    return [{"name": c["name"], "start": c["start_event"], "stop": c["stop_event"]} for c in bootstrap.get("chips", [])]
+
+
+def plan_gameweeks(next_gw: int, windows: list[dict], last_gw: int) -> list[int]:
+    """Gameweeks to project: the usual horizon, extended to the end of the chip window
+    the next gameweek falls in, so every gameweek a current chip can be played is covered."""
+    end = max((w["stop"] for w in windows if w["start"] <= next_gw <= w["stop"]), default=next_gw)
+    return list(range(next_gw, min(last_gw, max(next_gw + HORIZON - 1, end)) + 1))
+
+
 def build(bootstrap: dict, fixtures: list[dict], live: dict[int, dict], predictions: dict, now: datetime) -> dict:
     r = Ratings.from_predictions(predictions)
     teams = {t["id"]: t for t in bootstrap["teams"]}
@@ -269,6 +281,8 @@ def build(bootstrap: dict, fixtures: list[dict], live: dict[int, dict], predicti
     if nxt is None:
         raise RuntimeError("no upcoming gameweek: the season may be over")
     gws = [g for g in range(nxt["id"], nxt["id"] + HORIZON) if any(e["id"] == g for e in events)]
+    windows = chip_windows(bootstrap)
+    plan_gws = plan_gameweeks(nxt["id"], windows, max(e["id"] for e in events))
 
     team_fixtures: dict[str, dict[int, list[Fixture]]] = defaultdict(lambda: defaultdict(list))
     played_gws: dict[str, set] = defaultdict(set)
@@ -278,7 +292,7 @@ def build(bootstrap: dict, fixtures: list[dict], live: dict[int, dict], predicti
         h, a = tname[f["team_h"]], tname[f["team_a"]]
         if f.get("finished") or f.get("finished_provisional"):
             played_gws[h].add(f["event"]); played_gws[a].add(f["event"])
-        elif f["event"] in gws:
+        elif f["event"] in plan_gws:
             team_fixtures[h][f["event"]].append(Fixture(f["event"], h, a, True, f["kickoff_time"]))
             team_fixtures[a][f["event"]].append(Fixture(f["event"], a, h, False, f["kickoff_time"]))
 
@@ -293,7 +307,7 @@ def build(bootstrap: dict, fixtures: list[dict], live: dict[int, dict], predicti
         team = tname[e["team"]]
         pr = profile(histories.get(e["id"], []), positions[e["id"]], sorted(played_gws[team]), priors)
         xp, nxt_c = [], None
-        for i, gw in enumerate(gws):
+        for i, gw in enumerate(plan_gws):
             avail = availability(e["status"], e["chance_of_playing_next_round"], i)
             comps = [fixture_points(pr, fx, r, sc, avail) for fx in team_fixtures[team].get(gw, [])]
             xp.append(round(sum(c["total"] for c in comps), 2))
@@ -309,7 +323,8 @@ def build(bootstrap: dict, fixtures: list[dict], live: dict[int, dict], predicti
             "chance": e["chance_of_playing_next_round"], "news": e["news"] or "",
             "points": e["total_points"], "minutes": e["minutes"],
             "p_play": round(pr.p_play, 3), "p60": round(pr.p60, 3), "exp_minutes": round(pr.exp_minutes, 1),
-            "xp": xp, "xp_total": round(sum(xp), 2), "next": nxt_c,
+            "xp": xp[:len(gws)], "xp_total": round(sum(xp[:len(gws)]), 2), "next": nxt_c,
+            "xp_plan": xp,
         })
 
     team_rows = []
@@ -325,7 +340,7 @@ def build(bootstrap: dict, fixtures: list[dict], live: dict[int, dict], predicti
 
     return {
         "meta": {"generated": now.strftime("%Y-%m-%dT%H:%M:%SZ"), "next_gw": nxt["id"], "deadline": nxt["deadline_time"],
-                 "gws": gws, "data_through_gw": max(live) if live else 0, "scoring": sc,
+                 "gws": gws, "plan_gws": plan_gws, "chips": windows, "data_through_gw": max(live) if live else 0, "scoring": sc,
                  "defcon_threshold": DEFCON_THRESHOLD, "budget": bootstrap["game_config"]["rules"]["squad_total_spend"] / 10,
                  "team_limit": bootstrap["game_config"]["rules"]["squad_team_limit"],
                  "squad": {POS[et["id"]]: et["squad_select"] for et in bootstrap["element_types"]},
@@ -374,12 +389,14 @@ def fetch_entries(ids: list[str], current_gw: int) -> dict:
         try:
             entry = _get_json(f"entry/{i}/")
             picks = _get_json(f"entry/{i}/event/{current_gw}/picks/")
+            history = _get_json(f"entry/{i}/history/")
         except Exception as e:
             print(f"Team {i}: could not fetch ({e})", file=sys.stderr)
             continue
         out[i] = {"name": entry.get("name") or i, "gw": current_gw,
                   "picks": [p["element"] for p in picks.get("picks", [])],
-                  "bank": (picks.get("entry_history") or {}).get("bank", 0)}
+                  "bank": (picks.get("entry_history") or {}).get("bank", 0),
+                  "chips_used": [{"name": c["name"], "event": c["event"]} for c in history.get("chips", [])]}
     return out
 
 
