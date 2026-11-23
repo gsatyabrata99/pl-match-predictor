@@ -54,8 +54,8 @@ def load(season: str) -> SeasonData:
     player_rows, pos = [], {}
     for r in rows:
         fid = r["fixture"]
-        if fid not in fixtures:
-            continue
+        if fid not in fixtures or r["position"] not in POSMAP:
+            continue            # "AM" = 2024-25 Assistant Manager chip entries: managers, never play
         pid, team, mins = int(r["element"]), r["team"], int(r["minutes"])
         pos[pid] = POSMAP[r["position"]]
         t = tm.setdefault((fid, team), TeamMatch(fid, fixtures[fid][3]))
