@@ -685,3 +685,4 @@
 {"captured_at":"2026-11-24T17:52:26Z","chance_next":0,"chance_this":0,"id":360,"name":"Bradley","news":"Knee injury - Expected back 12 Dec","news_added":"2026-07-23T12:01:23.565711Z","next_gw":12,"pos":2,"schema":1,"status":"i","team":"Liverpool"}
 {"captured_at":"2026-11-24T17:52:26Z","chance_next":0,"chance_this":0,"id":363,"name":"Leoni","news":"Knee injury - Expected back 12 Dec","news_added":"2026-07-23T12:01:23.596909Z","next_gw":12,"pos":2,"schema":1,"status":"i","team":"Liverpool"}
 {"captured_at":"2026-11-24T17:52:26Z","chance_next":75,"chance_this":0,"id":423,"name":"Shaw","news":"Unspecified injury - 75% chance of playing","news_added":"2026-10-12T21:30:08.995810Z","next_gw":12,"pos":2,"schema":1,"status":"d","team":"Man Utd"}
+{"captured_at":"2026-11-25T00:50:17Z","chance_next":100,"chance_this":null,"id":420,"name":"Yoro","news":"","news_added":"2026-11-22T17:00:05.657366Z","next_gw":12,"pos":2,"schema":1,"status":"a","team":"Man Utd"}
