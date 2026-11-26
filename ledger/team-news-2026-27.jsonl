@@ -692,3 +692,6 @@
 {"captured_at":"2026-11-26T00:29:31Z","chance_next":100,"chance_this":75,"id":325,"name":"Darlow","news":"","news_added":"2026-11-20T17:00:04.943349Z","next_gw":12,"pos":1,"schema":1,"status":"a","team":"Man Utd"}
 {"captured_at":"2026-11-26T00:29:31Z","chance_next":100,"chance_this":0,"id":423,"name":"Shaw","news":"","news_added":"2026-10-12T21:30:08.995810Z","next_gw":12,"pos":2,"schema":1,"status":"a","team":"Man Utd"}
 {"captured_at":"2026-11-26T00:29:31Z","chance_next":100,"chance_this":0,"id":482,"name":"Hudson-Odoi","news":"","news_added":"2026-11-19T15:30:05.816247Z","next_gw":12,"pos":3,"schema":1,"status":"a","team":"Nott'm Forest"}
+{"captured_at":"2026-11-26T16:59:44Z","chance_next":100,"chance_this":100,"id":159,"name":"Caicedo","news":"","news_added":"2026-11-21T16:30:05.451902Z","next_gw":12,"pos":3,"schema":1,"status":"a","team":"Chelsea"}
+{"captured_at":"2026-11-26T16:59:44Z","chance_next":0,"chance_this":100,"id":492,"name":"Awoniyi","news":"Ankle injury - Unknown return date","news_added":"2026-11-21T16:30:05.778377Z","next_gw":12,"pos":4,"schema":1,"status":"i","team":"Coventry City"}
+{"captured_at":"2026-11-26T16:59:44Z","chance_next":75,"chance_this":100,"id":377,"name":"Munoz","news":"Knee injury - 75% chance of playing","news_added":"2026-11-26T03:30:05.640103Z","next_gw":12,"pos":3,"schema":1,"status":"d","team":"Liverpool"}
